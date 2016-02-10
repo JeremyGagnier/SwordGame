@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public class Player : MonoBehaviour
+public class Player : Character
 {
     public const float PRADIUS = 100.0f; // How big players are
 
@@ -29,11 +29,9 @@ public class Player : MonoBehaviour
         }
     }
 
-    public float posx = 0.0f;
-    public float posy = 0.0f;
     public int pnum;
     public Sword sword;
-    public float dmgLeftovers = 0.0f;
+    private float dmgLeftovers = 0.0f;
 
     public float speed
     {
@@ -49,9 +47,10 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void Setup(World world, float startx, float starty, int player)
+    public void Setup(World world, float startx, float starty, int player, int team)
     {
         this.world = world;
+        this.team = team;
         sword.world = world;
         sword.owner = this;
         posx = startx;
@@ -60,7 +59,7 @@ public class Player : MonoBehaviour
         transform.position = new Vector3(posx, posy);
     }
 
-    void Update()
+    new void Update()
     {
         float dx = 0.0f;
         float dy = 0.0f;
@@ -205,14 +204,15 @@ public class Player : MonoBehaviour
         {
             posy = 2160;
         }
-        this.transform.position = new Vector3(posx, posy);
+
+        base.Update();
     }
 
-    public void Damage(GameObject source, float damage, float weight)
+    public void Damage(Transform source, float damage, float weight)
     {
         // Apply knockback
-        float dx = posx - source.transform.position.x;
-        float dy = posy - source.transform.position.y;
+        float dx = posx - source.position.x;
+        float dy = posy - source.position.y;
         float a = Mathf.Atan2(dy, dx);
         posx += 7.0f * weight * Mathf.Cos(a);
         posy += 7.0f * weight * Mathf.Sin(a);
@@ -225,5 +225,6 @@ public class Player : MonoBehaviour
             dmgLeftovers -= 1.0f;
             sword.RemovePart();
         }
+        invincibility += 0.4f;
     }
 }

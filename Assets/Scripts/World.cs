@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -66,10 +67,14 @@ public class World : MonoBehaviour
     public GameObject p3Camera;
     public GameObject p4Camera;
 
-    public GameObject player1;
-    public GameObject player2;
-    public GameObject player3;
-    public GameObject player4;
+    public GameObject p1Object;
+    public GameObject p2Object;
+    public GameObject p3Object;
+    public GameObject p4Object;
+    private Player player1;
+    private Player player2;
+    private Player player3;
+    private Player player4;
 
     public int numPlayers;
     public int timeLeft;
@@ -82,7 +87,11 @@ public class World : MonoBehaviour
 
     void Start()
     {
-        GetComponent<AudioSource>().Play();
+        //GetComponent<AudioSource>().Play();
+        player1 = p1Object.GetComponent<Player>();
+        player2 = p2Object.GetComponent<Player>();
+        player3 = p3Object.GetComponent<Player>();
+        player4 = p4Object.GetComponent<Player>();
     }
 
     public void StartGame(int numPlayers)
@@ -90,10 +99,10 @@ public class World : MonoBehaviour
         titleScreen.SetActive(false);
         this.numPlayers = numPlayers;
 
-        player1.SetActive(true);
-        player1.GetComponent<Player>().Setup(this, -300, 0, 1);
-        player2.SetActive(true);
-        player2.GetComponent<Player>().Setup(this, 300, 0, 2);
+        p1Object.SetActive(true);
+        player1.Setup(this, -300, 0, 1, 1);
+        p2Object.SetActive(true);
+        player2.Setup(this, 300, 0, 2, 2);
         if (numPlayers == 2)
         {
             p1Camera1.SetActive(true);
@@ -112,25 +121,25 @@ public class World : MonoBehaviour
         if (numPlayers >= 3)
         {
             p3Camera.SetActive(true);
-            player3.SetActive(true);
-            player3.GetComponent<Player>().Setup(this, 0, -300, 3);
+            p3Object.SetActive(true);
+            player3.Setup(this, 0, -300, 3, 3);
         }
         else
         {
             p3Camera.SetActive(false);
-            player3.SetActive(false);
+            p3Object.SetActive(false);
         }
 
         if (numPlayers >= 4)
         {
             p4Camera.SetActive(true);
-            player4.SetActive(true);
-            player4.GetComponent<Player>().Setup(this, 0, 300, 4);
+            p4Object.SetActive(true);
+            player4.Setup(this, 0, 300, 4, 4);
         }
         else
         {
             p4Camera.SetActive(false);
-            player4.SetActive(false);
+            p4Object.SetActive(false);
         }
 
         StartCoroutine(Timer());
@@ -244,9 +253,10 @@ public class World : MonoBehaviour
                 break;
         }
         obj.transform.SetParent(this.transform);
-        obj.transform.position = new Vector3(pos.x, pos.y);
-        obj.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-        obj.GetComponent<Enemy>().world = this;
+        Enemy e = obj.GetComponent<Enemy>();
+        e.posx = pos.x;
+        e.posy = pos.y;
+        e.world = this;
         enemies.Add(obj);
         return obj;
     }
@@ -257,7 +267,7 @@ public class World : MonoBehaviour
         Enemy e = enemy.GetComponent<Enemy>();
         if (e.rarity == 1)
         {
-            int pick = Random.Range(0, 3);
+            int pick = UnityEngine.Random.Range(0, 3);
             if (pick == 0) dropPart = Part.BUCKET;
             if (pick == 1) dropPart = Part.LOG;
             if (pick == 2) dropPart = Part.FLOWER;
@@ -265,14 +275,14 @@ public class World : MonoBehaviour
         }
         else if (e.rarity == 2)
         {
-            int pick = Random.Range(0, 2);
+            int pick = UnityEngine.Random.Range(0, 2);
             if (pick == 0) dropPart = Part.CACTUS;
             if (pick == 1) dropPart = Part.LEMON;
             if (pick == 2) dropPart = Part.UKELELE;
         }
         else if (e.rarity == 3)
         {
-            int pick = Random.Range(0, 3);
+            int pick = UnityEngine.Random.Range(0, 3);
             if (pick == 0) dropPart = Part.ANCHOR;
             if (pick == 1) dropPart = Part.BLADE;
             if (pick == 2) dropPart = Part.LOBSTER;
@@ -280,7 +290,7 @@ public class World : MonoBehaviour
         }
         else if (e.rarity == 4)
         {
-            int pick = Random.Range(0, 2);
+            int pick = UnityEngine.Random.Range(0, 2);
             if (pick == 0) dropPart = Part.DOG;
             if (pick == 1) dropPart = Part.UKIWI;
             if (pick == 2) dropPart = Part.LIGHTSABER;
@@ -307,29 +317,29 @@ public class World : MonoBehaviour
                 timeText.text = (timeLeft / 60).ToString() + ":" + minutes;
             }
 
-            if (timeLeft > 30 && (timeLeft % (5 - numPlayers) == 0))
+            if (timeLeft > 110 && (timeLeft % (5 - numPlayers) == 0))
             {
-                int choose = Random.Range(0, 26);
-                int side = Random.Range(0, 3);
+                int choose = UnityEngine.Random.Range(0, 26);
+                int side = UnityEngine.Random.Range(0, 3);
                 Vector2 vec = new Vector2();
                 if (side == 0)
                 {
-                    int slider = Random.Range(0, 4320);
+                    int slider = UnityEngine.Random.Range(0, 4320);
                     vec = new Vector2(-2880, slider - 2160);
                 }
                 if (side == 1)
                 {
-                    int slider = Random.Range(0, 5760);
+                    int slider = UnityEngine.Random.Range(0, 5760);
                     vec = new Vector2(slider - 2880, 2160);
                 }
                 if (side == 2)
                 {
-                    int slider = Random.Range(0, 4320);
+                    int slider = UnityEngine.Random.Range(0, 4320);
                     vec = new Vector2(2880, slider - 2160);
                 }
                 if (side == 3)
                 {
-                    int slider = Random.Range(0, 5760);
+                    int slider = UnityEngine.Random.Range(0, 5760);
                     vec = new Vector2(slider - 2880, -2160);
                 }
 
@@ -357,26 +367,90 @@ public class World : MonoBehaviour
 
     public void EndGame()
     {
-        int winner_size = player1.GetComponent<Player>().sword.parts.Count;
+        int winner_size = p1Object.GetComponent<Player>().sword.parts.Count;
         int winner = 1;
-        if (player2.GetComponent<Player>().sword.parts.Count > winner_size)
+        if (p2Object.GetComponent<Player>().sword.parts.Count > winner_size)
         {
-            winner_size = player2.GetComponent<Player>().sword.parts.Count;
+            winner_size = p2Object.GetComponent<Player>().sword.parts.Count;
             winner = 2;
         }
-        if (player3.GetComponent<Player>().sword.parts.Count > winner_size)
+        if (p3Object.GetComponent<Player>().sword.parts.Count > winner_size)
         {
-            winner_size = player3.GetComponent<Player>().sword.parts.Count;
+            winner_size = p3Object.GetComponent<Player>().sword.parts.Count;
             winner = 3;
         }
-        if (player4.GetComponent<Player>().sword.parts.Count > winner_size)
+        if (p4Object.GetComponent<Player>().sword.parts.Count > winner_size)
         {
-            winner_size = player4.GetComponent<Player>().sword.parts.Count;
+            winner_size = p4Object.GetComponent<Player>().sword.parts.Count;
             winner = 4;
         }
         egt1.enabled = true;
         egt1.text = "Player" + winner.ToString() + " Wins!!!";
         egt2.enabled = true;
         egt2.text = "Their sword had " + (winner_size + 1).ToString() + " parts";
+    }
+
+    public void Attack(int sourceTeam, Transform source, float radius, Transform knockbackSource, float damage, float weight, Action callback)
+    {
+        if (player1.team != sourceTeam &&
+            player1.invincibility <= 0.0f &&
+            Collision.dist(source.position.x, source.position.y, player1.posx, player1.posy) <= Player.PRADIUS + radius)
+        {
+            player1.Damage(knockbackSource, damage, weight);
+            if (callback != null)
+            {
+                callback();
+                callback = null;
+            }
+        }
+        if (player2.team != sourceTeam &&
+            player2.invincibility <= 0.0f &&
+            Collision.dist(source.position.x, source.position.y, player2.posx, player2.posy) <= Player.PRADIUS + radius)
+        {
+            player2.Damage(knockbackSource, damage, weight);
+            if (callback != null)
+            {
+                callback();
+                callback = null;
+            }
+        }
+        if (player3.team != sourceTeam &&
+            player3.invincibility <= 0.0f &&
+            Collision.dist(source.position.x, source.position.y, player3.posx, player3.posy) <= Player.PRADIUS + radius)
+        {
+            player3.Damage(knockbackSource, damage, weight);
+            if (callback != null)
+            {
+                callback();
+                callback = null;
+            }
+        }
+        if (player4.team != sourceTeam &&
+            player4.invincibility <= 0.0f &&
+            Collision.dist(source.position.x, source.position.y, player4.posx, player4.posy) <= Player.PRADIUS + radius)
+        {
+            player4.Damage(knockbackSource, damage, weight);
+            if (callback != null)
+            {
+                callback();
+                callback = null;
+            }
+        }
+
+        foreach (GameObject enemy in enemies)
+        {
+            Enemy e = enemy.GetComponent<Enemy>();
+            if (e.team != sourceTeam &&
+                e.invincibility <= 0.0f &&
+                Collision.dist(source.position.x, source.position.y, e.posx, e.posy) <= e.radius + radius)
+            {
+                e.Damage(knockbackSource, damage, weight);
+                if (callback != null)
+                {
+                    callback();
+                    callback = null;
+                }
+            }
+        }
     }
 }

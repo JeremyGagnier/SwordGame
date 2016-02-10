@@ -26,8 +26,6 @@ public class Sword : MonoBehaviour
     public SwordPart hilt;
     public List<Node> freeNodes = new List<Node>();
     public List<SwordPart> parts = new List<SwordPart>();
-    public bool[] damaged = { false, false, false, false };
-    public List<GameObject> damagedEnemies = new List<GameObject>();
 
     public float weight;
     public float damage;
@@ -83,8 +81,6 @@ public class Sword : MonoBehaviour
             }
             else
             {
-                for (int i = 0; i < 4; ++i) damaged[i] = false;
-                damagedEnemies.Clear();
                 state = SwingState.NONE;
             }
         }
@@ -207,87 +203,10 @@ public class Sword : MonoBehaviour
     private void CheckCollisions()
     {
         parts.Add(hilt);
-        if (owner.pnum != 1 && !damaged[0])
+        foreach (SwordPart part in parts)
         {
-            foreach (SwordPart part in parts)
-            {
-                if (Collision.dist(part.transform.position.x,
-                                   part.transform.position.y,
-                                   world.player1.transform.position.x,
-                                   world.player1.transform.position.y) <= Player.PRADIUS)
-                {
-                    world.player1.GetComponent<Player>().Damage(owner.gameObject, Mathf.Sqrt(damage), weight);
-                    damaged[0] = true;
-                }
-            }
+            world.Attack(owner.team, part.transform, 0.0f, owner.transform, Mathf.Sqrt(damage), weight, null);
         }
-        if (owner.pnum != 2 && !damaged[1])
-        {
-            foreach (SwordPart part in parts)
-            {
-                if (Collision.dist(part.transform.position.x,
-                                   part.transform.position.y,
-                                   world.player2.transform.position.x,
-                                   world.player2.transform.position.y) <= Player.PRADIUS)
-                {
-                    world.player2.GetComponent<Player>().Damage(owner.gameObject, Mathf.Sqrt(damage), weight);
-                    damaged[1] = true;
-                }
-            }
-        }
-        if (owner.pnum != 3 && !damaged[2] && world.numPlayers >= 3)
-        {
-            foreach (SwordPart part in parts)
-            {
-                if (Collision.dist(part.transform.position.x,
-                                   part.transform.position.y,
-                                   world.player3.transform.position.x,
-                                   world.player3.transform.position.y) <= Player.PRADIUS)
-                {
-                    world.player3.GetComponent<Player>().Damage(owner.gameObject, Mathf.Sqrt(damage), weight);
-                    damaged[2] = true;
-                }
-            }
-        }
-        if (owner.pnum != 4 && !damaged[3] && world.numPlayers >= 4)
-        {
-            foreach (SwordPart part in parts)
-            {
-                if (Collision.dist(part.transform.position.x,
-                                   part.transform.position.y,
-                                   world.player4.transform.position.x,
-                                   world.player4.transform.position.y) <= Player.PRADIUS)
-                {
-                    world.player4.GetComponent<Player>().Damage(owner.gameObject, Mathf.Sqrt(damage), weight);
-                    damaged[3] = true;
-                }
-            }
-        }
-
-        for (int i = 0; i < world.enemies.Count; ++i)
-        {
-            foreach (SwordPart part in parts)
-            {
-                if (damagedEnemies.Contains(world.enemies[i])) continue;
-
-                if (Collision.dist(part.transform.position.x,
-                                   part.transform.position.y,
-                                   world.enemies[i].transform.position.x,
-                                   world.enemies[i].transform.position.y) <= world.enemies[i].GetComponent<Enemy>().radius)
-                {
-                    if (world.enemies[i].GetComponent<Enemy>().Damage(owner.gameObject, Mathf.Sqrt(damage), weight))
-                    {
-                        i -= 1;
-                        break;
-                    }
-                    else
-                    {
-                        damagedEnemies.Add(world.enemies[i]);
-                    }
-                }
-            }
-        }
-
         parts.Remove(hilt);
     }
 }
