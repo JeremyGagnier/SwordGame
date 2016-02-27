@@ -7,8 +7,8 @@ public class Node
 {
     [System.NonSerialized]
     public SwordPart parent;
-    public Vector2 pos;
-    public Vector2 dir;
+    public FVector pos;
+    public FVector dir;
 }
 
 public class Sword : MonoBehaviour
@@ -27,14 +27,15 @@ public class Sword : MonoBehaviour
     public List<Node> freeNodes = new List<Node>();
     public List<SwordPart> parts = new List<SwordPart>();
 
-    public float weight;
-    public float damage;
+    public FVector position;
+    public FInt weight;
+    public FInt damage;
 
     public SwingState state = SwingState.NONE;
-    public float swingDuration = 0.0f;
-    public float maxDuration = 0.0f;
-    public float swingCooldown = 0.0f;
-    public float angle = 0.0f;
+    public FInt swingDuration = FInt.Zero();
+    public FInt maxDuration = FInt.Zero();
+    public FInt swingCooldown = FInt.Zero();
+    public FInt angle = FInt.Zero();
 
     void Start()
     {
@@ -45,28 +46,28 @@ public class Sword : MonoBehaviour
 
     void Update()
     {
-        if (swingDuration > 0.0f)
+        if (swingDuration.rawValue > 0)
         {
             hilt.gameObject.SetActive(true);
-            swingDuration -= Time.deltaTime;
-            float pct = swingDuration / maxDuration;
+            swingDuration -= Game.TIMESTEP;
+            float pct = (swingDuration / maxDuration).ToFloat();
             switch (state)
             {
                 case SwingState.STAB:
                     // Move in accordance with stabbing
-                    transform.localPosition = new Vector3(150 * (1 - pct) * Mathf.Cos(angle + Mathf.PI / 2),
-                                                          61 + 150 * (1 - pct) * Mathf.Sin(angle + Mathf.PI / 2));
-                    transform.localEulerAngles = new Vector3(0, 0, angle * 180 / Mathf.PI);
+                    transform.localPosition = new Vector3(150 * (1 - pct) * Mathf.Cos(angle.ToFloat() + Mathf.PI / 2),
+                                                          61 + 150 * (1 - pct) * Mathf.Sin(angle.ToFloat() + Mathf.PI / 2));
+                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI);
                     break;
                 case SwingState.CWISE:
-                    transform.localPosition = new Vector3(150 * Mathf.Cos(angle + Mathf.PI / 2 + Mathf.PI / 2 * (1 - pct)),
-                                                          61 + 150 * Mathf.Sin(angle + Mathf.PI / 2 + Mathf.PI / 2 * (1 - pct)));
-                    transform.localEulerAngles = new Vector3(0, 0, angle * 180 / Mathf.PI + 90 * (1 - pct));
+                    transform.localPosition = new Vector3(150 * Mathf.Cos(angle.ToFloat() + Mathf.PI / 2 + Mathf.PI / 2 * (1 - pct)),
+                                                          61 + 150 * Mathf.Sin(angle.ToFloat() + Mathf.PI / 2 + Mathf.PI / 2 * (1 - pct)));
+                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI + 90 * (1 - pct));
                     break;
                 case SwingState.CCWISE:
-                    transform.localPosition = new Vector3(150 * Mathf.Cos(angle + Mathf.PI / 2 - Mathf.PI / 2 * (1 - pct)),
-                                                          61 + 150 * Mathf.Sin(angle + Mathf.PI / 2 - Mathf.PI / 2 * (1 - pct)));
-                    transform.localEulerAngles = new Vector3(0, 0, angle * 180 / Mathf.PI - 90 * (1 - pct));
+                    transform.localPosition = new Vector3(150 * Mathf.Cos(angle.ToFloat() + Mathf.PI / 2 - Mathf.PI / 2 * (1 - pct)),
+                                                          61 + 150 * Mathf.Sin(angle.ToFloat() + Mathf.PI / 2 - Mathf.PI / 2 * (1 - pct)));
+                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI - 90 * (1 - pct));
                     break;
 
             }
@@ -75,9 +76,9 @@ public class Sword : MonoBehaviour
         else
         {
             hilt.gameObject.SetActive(false);
-            if (swingCooldown > 0.0f)
+            if (swingCooldown.rawValue > 0)
             {
-                swingCooldown -= Time.deltaTime;
+                swingCooldown -= Game.TIMESTEP;
             }
             else
             {
@@ -86,23 +87,23 @@ public class Sword : MonoBehaviour
         }
     }
 
-    public void Swing(SwingState swingType, float swingAngle)
+    public void Swing(SwingState swingType, FInt swingAngle)
     {
         if (state != SwingState.NONE)
         {
             return;
         }
         state = swingType;
-        swingDuration = 0.1f + 0.025f * weight;
+        swingDuration = new FInt(0.1f) + new FInt(0.025f) * weight;
         maxDuration = swingDuration;
-        swingCooldown = 0.1f + 0.01f * weight;
+        swingCooldown = new FInt(0.1f) + new FInt(0.01f) * weight;
         switch (state)
         {
             case SwingState.STAB:
-                angle = swingAngle - Mathf.PI / 2.0f;
+                angle = swingAngle - new FInt(3.1415f / 2.0f);
                 break;
             case SwingState.CWISE:
-                angle = swingAngle - Mathf.PI;
+                angle = swingAngle - new FInt(3.1415f);
                 break;
             case SwingState.CCWISE:
                 angle = swingAngle;
@@ -115,22 +116,22 @@ public class Sword : MonoBehaviour
         SwordPart swordPart = part.GetComponent<SwordPart>();
 
         Node n = freeNodes[0];
-        float w = 0;
+        FInt w = FInt.Zero();
         foreach (Node m in freeNodes)
         {
-            if (m.parent.truey < 0.0f) continue;
-            w += 1.0f + m.parent.truey * m.parent.truey;
+            if (m.parent.truey.rawValue < 0) continue;
+            w += new FInt(1.0f) + m.parent.truey * m.parent.truey;
         }
-        if (w == 0)
+        if (w.rawValue == 0)
         {
             return;
         }
-        float choose = Random.Range(0.0f, w);
-        w = 0;
+        FInt choose = FInt.RandomRange(0, FInt.Zero(), w);
+        w = FInt.Zero();
         foreach (Node m in freeNodes)
         {
-            if (m.parent.truey < 0.0f) continue;
-            w += 1.0f + m.parent.truey * m.parent.truey;
+            if (m.parent.truey.rawValue < 0) continue;
+            w += new FInt(1.0f) + m.parent.truey * m.parent.truey;
             if (choose <= w)
             {
                 n = m;
@@ -176,27 +177,30 @@ public class Sword : MonoBehaviour
         parts.RemoveAt(parts.Count - 1);
 
         part.transform.SetParent(world.transform);
-        float randangle = Random.Range(0.0f, 2.0f * Mathf.PI);
-        float randdist = Random.Range(3.0f * Player.PRADIUS, 6.0f * Player.PRADIUS);
-        Vector3 pos = new Vector3(owner.transform.position.x + randdist * Mathf.Cos(randangle),
-                                  owner.transform.position.y + randdist * Mathf.Sin(randangle));
-        if (pos.x < -2880)
+        FInt randangle = FInt.RandomRange(0, FInt.Zero(), new FInt(2.0f * 3.14159f));
+        FInt randdist = FInt.RandomRange(0, new FInt(3.0f) * Player.PRADIUS, new FInt(6.0f) * Player.PRADIUS);
+        FVector position = new FVector(owner.position.x + randdist * FInt.Cos(randangle),
+                                       owner.position.y + randdist * FInt.Sin(randangle));
+
+        // Don't throw parts outside the game map
+        if (position.x.rawValue < -2880)
         {
-            pos.x = -2880;
+            position.x.rawValue = -2880;
         }
-        if (pos.x > 2880)
+        if (position.x.rawValue > 2880)
         {
-            pos.x = 2880;
+            position.x.rawValue = 2880;
         }
-        if (pos.y < -2160)
+        if (position.y.rawValue < -2160)
         {
-            pos.y = -2160;
+            position.y.rawValue = -2160;
         }
-        if (pos.y > 2160)
+        if (position.y.rawValue > 2160)
         {
-            pos.y = 2160;
+            position.y.rawValue = 2160;
         }
-        part.transform.position = pos;
+
+        part.transform.position = new Vector3(position.x.ToFloat(), position.y.ToFloat());
         world.swordParts.Add(part);
     }
 
@@ -205,7 +209,7 @@ public class Sword : MonoBehaviour
         parts.Add(hilt);
         foreach (SwordPart part in parts)
         {
-            world.Attack(owner.team, part.transform, 0.0f, owner.transform, Mathf.Sqrt(damage), weight, null);
+            world.Attack(owner.team, SwordPart.Position(this, part), FInt.Zero(), owner.position, FInt.Sqrt(damage), weight, null);
         }
         parts.Remove(hilt);
     }

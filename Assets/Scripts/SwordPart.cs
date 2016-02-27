@@ -4,12 +4,22 @@ using System.Collections;
 public class SwordPart : MonoBehaviour
 {
     public int rarity;
-    public float weight;
-    public float damage;
+    public FVector position;
+    public FInt rotation;
+    public FInt weight;
+    public FInt damage;
     public Node[] nodePoints;
-    public float truex = 0.0f;
-    public float truey = 0.0f;
+    public FInt truex = FInt.Zero();
+    public FInt truey = FInt.Zero();
     public Node consumedNode;
+
+    // Recursively calculates the GLOBAL position of a sword part
+    public static FVector Position(Sword s, SwordPart p)
+    {
+        // TODO: Implement the recursive calculation
+        // BREAKS: Sword part collisions
+        return new FVector();
+    }
 
     void Awake()
     {
@@ -23,23 +33,30 @@ public class SwordPart : MonoBehaviour
     {
         // Attach this sword part by making the node point at myPoint
         // equivelant to the attach point
-        float a1 = Mathf.Atan2(nodePoints[myPoint].dir.y, nodePoints[myPoint].dir.x);
-        float a2 = Mathf.Atan2(attachPoint.dir.y, attachPoint.dir.x);
-        float angle = a2 - a1 + Mathf.PI;
-        transform.localEulerAngles = new Vector3(0, 0, angle * 180 / Mathf.PI);
+        FInt a1 = FInt.Atan(nodePoints[myPoint].dir.x, nodePoints[myPoint].dir.y);
+        FInt a2 = FInt.Atan(attachPoint.dir.x, attachPoint.dir.y);
+        FInt angle = a2 - a1 + new FInt(3.1415f);
+        rotation = angle;
 
-        float px = nodePoints[myPoint].pos.x;
-        float py = nodePoints[myPoint].pos.y;
-        float length = Mathf.Sqrt((px * px) + (py * py));
-        float a3 = Mathf.Atan2(py, px);
-        float transx = length * Mathf.Cos(a3 + angle);
-        float transy = length * Mathf.Sin(a3 + angle);
+        FInt px = nodePoints[myPoint].pos.x;
+        FInt py = nodePoints[myPoint].pos.y;
+        FInt length = FInt.Sqrt((px * px) + (py * py));
+        FInt a3 = FInt.Atan(px, py);
+        FInt transx = length * FInt.Cos(a3 + angle);
+        FInt transy = length * FInt.Sin(a3 + angle);
+        position = new FVector(attachPoint.pos.x - transx, attachPoint.pos.y - transy);
 
-        transform.localPosition = new Vector3(attachPoint.pos.x - transx, attachPoint.pos.y - transy);
+        transform.localEulerAngles = new Vector3(0, 0, rotation.ToFloat() * 180.0f / Mathf.PI);
+        transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
+
+        // TODO: Find truey via recursive transformations
+        // BREAKS: Proper sword construction
+        /*
         Vector3 localrot = sword.transform.localEulerAngles;
         sword.transform.localEulerAngles = new Vector3(0, 0, 0);
         Vector3 diff = transform.position - sword.transform.position;
         truey = diff.y;
         sword.transform.localEulerAngles = localrot;
+         */
     }
 }

@@ -3,17 +3,18 @@ using System.Collections;
 
 public class Character : MonoBehaviour
 {
+    public FVector position = new FVector(FInt.Zero(), FInt.Zero());
     public float posx = 0.0f;
     public float posy = 0.0f;
     public int team;
-    public float invincibility = 0.0f;
+    public FInt invincibility = FInt.Zero();
 
     public void Update()
     {
-        if (invincibility > 0.0f)
+        if (invincibility.rawValue > 0)
         {
-            invincibility -= Time.deltaTime;
+            invincibility -= Game.TIMESTEP;
         }
-        transform.position = new Vector3(posx, posy);
+        transform.position = new Vector3(position.x.ToFloat(), position.y.ToFloat());
     }
 }

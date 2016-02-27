@@ -4,13 +4,13 @@ using System.Collections;
 public class InputManager
 {
     // Player 1 ------------------------------------------
-    public static float p1axisx
+    public static FInt p1axisx
     {
-        get { return Input.GetAxis("p1axisx"); }
+        get { return new FInt(Input.GetAxis("p1axisx")); }
     }
-    public static float p1axisy
+    public static FInt p1axisy
     {
-        get { return Input.GetAxis("p1axisy"); }
+        get { return new FInt(Input.GetAxis("p1axisy")); }
     }
     public static bool p1button1
     {
@@ -30,13 +30,13 @@ public class InputManager
     }
 
     // Player 2 ------------------------------------------
-    public static float p2axisx
+    public static FInt p2axisx
     {
-        get { return Input.GetAxis("p2axisx"); }
+        get { return new FInt(Input.GetAxis("p2axisx")); }
     }
-    public static float p2axisy
+    public static FInt p2axisy
     {
-        get { return Input.GetAxis("p2axisy"); }
+        get { return new FInt(Input.GetAxis("p2axisy")); }
     }
     public static bool p2button1
     {
@@ -56,13 +56,13 @@ public class InputManager
     }
 
     // Player 3 ------------------------------------------
-    public static float p3axisx
+    public static FInt p3axisx
     {
-        get { return Input.GetAxis("p3axisx"); }
+        get { return new FInt(Input.GetAxis("p3axisx")); }
     }
-    public static float p3axisy
+    public static FInt p3axisy
     {
-        get { return Input.GetAxis("p3axisy"); }
+        get { return new FInt(Input.GetAxis("p3axisy")); }
     }
     public static bool p3button1
     {
@@ -82,13 +82,13 @@ public class InputManager
     }
 
     // Player 4 ------------------------------------------
-    public static float p4axisx
+    public static FInt p4axisx
     {
-        get { return Input.GetAxis("p4axisx"); }
+        get { return new FInt(Input.GetAxis("p4axisx")); }
     }
-    public static float p4axisy
+    public static FInt p4axisy
     {
-        get { return Input.GetAxis("p4axisy"); }
+        get { return new FInt(Input.GetAxis("p4axisy")); }
     }
     public static bool p4button1
     {

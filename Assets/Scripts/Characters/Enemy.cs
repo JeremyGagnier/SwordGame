@@ -6,14 +6,14 @@ public class Enemy : Character
 {
     public World world;
     public int rarity;
-    public float speed;
-    public float health;
-    public float damage;
-    public float weight;
-    public float radius;
+    public FInt speed;
+    public FInt health;
+    public FInt damage;
+    public FInt weight;
+    public FInt radius;
 
-    private float rehitTimer = 0.0f;
-    private float damagedTimer = 0.0f;
+    private FInt rehitTimer = FInt.Zero();
+    private FInt damagedTimer = FInt.Zero();
 
     public Sprite normalTex;
     public Sprite hitTex;
@@ -28,23 +28,23 @@ public class Enemy : Character
     new void Update()
     {
         // Chase after closest available player
-        float d1 = Collision.dist(posx,
-                                  posy,
-                                  world.p1Object.transform.position.x,
-                                  world.p1Object.transform.position.y);
-        float d2 = Collision.dist(posx,
-                                  posy,
-                                  world.p2Object.transform.position.x,
-                                  world.p2Object.transform.position.y);
-        float d3 = Collision.dist(posx,
-                                  posy,
-                                  world.p3Object.transform.position.x,
-                                  world.p3Object.transform.position.y);
-        float d4 = Collision.dist(posx,
-                                  posy,
-                                  world.p4Object.transform.position.x,
-                                  world.p4Object.transform.position.y);
-        float closest = d1;
+        FInt d1 = Collision.dist(position.x,
+                                 position.y,
+                                 world.player1.position.x,
+                                 world.player1.position.y);
+        FInt d2 = Collision.dist(position.x,
+                                 position.y,
+                                 world.player2.position.x,
+                                 world.player2.position.y);
+        FInt d3 = Collision.dist(position.x,
+                                 position.y,
+                                 world.player3.position.x,
+                                 world.player3.position.y);
+        FInt d4 = Collision.dist(position.x,
+                                 position.y,
+                                 world.player4.position.x,
+                                 world.player4.position.y);
+        FInt closest = d1;
         int closest_pnum = 1;
         if (d2 < closest)
         {
@@ -61,37 +61,37 @@ public class Enemy : Character
             closest = d4;
             closest_pnum = 4;
         }
-        Vector2 dir = new Vector2();
+        FVector dir = new FVector();
         switch (closest_pnum)
         {
             case 1:
-                dir = new Vector2(world.p1Object.transform.position.x - posx,
-                                  world.p1Object.transform.position.y - posy);
+                dir = new FVector(world.player1.position.x - position.x,
+                                  world.player1.position.y - position.y);
                 dir.Normalize();
                 break;
 
             case 2:
-                dir = new Vector2(world.p2Object.transform.position.x - posx,
-                                  world.p2Object.transform.position.y - posy);
+                dir = new FVector(world.player2.position.x - position.x,
+                                  world.player2.position.y - position.y);
                 dir.Normalize();
                 break;
 
             case 3:
-                dir = new Vector2(world.p3Object.transform.position.x - posx,
-                                  world.p3Object.transform.position.y - posy);
+                dir = new FVector(world.player3.position.x - position.x,
+                                  world.player3.position.y - position.y);
                 dir.Normalize();
                 break;
 
             case 4:
-                dir = new Vector2(world.p4Object.transform.position.x - posx,
-                                  world.p4Object.transform.position.y - posy);
+                dir = new FVector(world.player4.position.x - position.x,
+                                  world.player4.position.y - position.y);
                 dir.Normalize();
                 break;
         }
-        posx += dir.x * speed * Time.deltaTime;
-        posy += dir.y * speed * Time.deltaTime;
+        position.x += dir.x * speed * Game.TIMESTEP;
+        position.y += dir.y * speed * Game.TIMESTEP;
 
-        if (dir.x < 0.0f)
+        if (dir.x.rawValue < 0)
         {
             transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         }
@@ -100,18 +100,18 @@ public class Enemy : Character
             transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
         }
 
-        world.Attack(team, transform, radius, transform, damage, weight, () => { rehitTimer = 1.0f; });
-        if (rehitTimer > 0.0f)
+        world.Attack(team, position, radius, position, damage, weight, () => { rehitTimer = new FInt(1.0f); });
+        if (rehitTimer.rawValue > 0)
         {
-            rehitTimer -= Time.deltaTime;
+            rehitTimer -= Game.TIMESTEP;
         }
 
-        if (damagedTimer > 0.0f)
+        if (damagedTimer.rawValue > 0)
         {
             character.sprite = hitTex;
-            damagedTimer -= Time.deltaTime;
+            damagedTimer -= Game.TIMESTEP;
         }
-        else if (rehitTimer > 0.0f && rehitTimer < 0.25f)
+        else if (rehitTimer.rawValue > 0 && rehitTimer < new FInt(0.25f))
         {
             character.sprite = attackTex;
         }
@@ -123,23 +123,25 @@ public class Enemy : Character
         base.Update();
     }
 
-    public void Damage(Transform source, float damage, float weight)
+    public void Damage(FVector source, FInt damage, FInt weight)
     {
         // Apply knockback
-        float dx = posx - source.position.x;
-        float dy = posy - source.position.y;
-        float a = Mathf.Atan2(dy, dx);
-        transform.position = new Vector3(posx + 7.0f * weight * Mathf.Cos(a),
-                                         posy + 7.0f * weight * Mathf.Sin(a));
+        FInt dx = position.x - source.x;
+        FInt dy = position.y - source.y;
+        FInt a = FInt.Atan(dx, dy);
+
+        // TODO: Smarter knockback calculation
+        position = new FVector(position.x + new FInt(7) * weight * FInt.Cos(a),
+                               position.y + new FInt(7) * weight * FInt.Sin(a));
 
         // Die if life reaches zero
         health -= damage;
-        if (health <= 0.0f)
+        if (health.rawValue <= 0)
         {
             world.KillEnemy(gameObject);
             return;
         }
-        damagedTimer = 0.25f;
-        invincibility += 0.4f;
+        damagedTimer = new FInt(0.25f);
+        invincibility += new FInt(0.4f);
     }
 }
