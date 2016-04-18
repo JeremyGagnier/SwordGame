@@ -126,7 +126,7 @@ public class Sword : MonoBehaviour
         {
             return;
         }
-        FInt choose = FInt.RandomRange(0, FInt.Zero(), w);
+        FInt choose = FInt.RandomRange(null, FInt.Zero(), w);
         w = FInt.Zero();
         foreach (Node m in freeNodes)
         {
@@ -177,8 +177,8 @@ public class Sword : MonoBehaviour
         parts.RemoveAt(parts.Count - 1);
 
         part.transform.SetParent(world.transform);
-        FInt randangle = FInt.RandomRange(0, FInt.Zero(), new FInt(2.0f * 3.14159f));
-        FInt randdist = FInt.RandomRange(0, new FInt(3.0f) * Player.PRADIUS, new FInt(6.0f) * Player.PRADIUS);
+        FInt randangle = FInt.RandomRange(null, FInt.Zero(), new FInt(2.0f * 3.14159f));
+        FInt randdist = FInt.RandomRange(null, new FInt(3.0f) * Player.PRADIUS, new FInt(6.0f) * Player.PRADIUS);
         FVector position = new FVector(owner.position.x + randdist * FInt.Cos(randangle),
                                        owner.position.y + randdist * FInt.Sin(randangle));
 
