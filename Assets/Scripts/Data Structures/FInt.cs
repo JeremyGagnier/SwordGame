@@ -40,8 +40,9 @@ public struct FVector
     // Normalize this vector
     public FVector Normalize()
     {
-        // TODO: Actually implement normalization
-        // BREAKS: Various positional algorithms
+        FInt length = FInt.Sqrt(x * x + y * y);
+        x = x / length;
+        y = y / length;
         return this;
     }
 }
@@ -112,6 +113,13 @@ public class FInt : ISerializationCallbackReceiver
         return z;
     }
 
+    public static FInt RawFInt(long raw)
+    {
+        FInt z = new FInt(0);
+        z.rawValue = raw;
+        return z;
+    }
+
     public static FInt Zero()
     {
         return new FInt(0);
@@ -157,48 +165,84 @@ public class FInt : ISerializationCallbackReceiver
     // Square root
     public static FInt Sqrt(FInt a)
     {
-        // TODO: Actually implement square root
-        // BREAKS: Various positional algorithms
-        return a;
+        FInt x = FInt.One();
+        long rx = x.rawValue;
+        long ax = a.rawValue;
+
+        for (int i = 0; i < 64; i++)
+        {
+            rx = (rx + ax / rx) / 2;
+        }
+
+        x.rawValue = rx;
+
+        return x;
     }
 
     // Sin
     public static FInt Sin(FInt a)
     {
-        // TODO: Actually implement floating integer sin
-        // BREAKS: Various positional algorithms
-        return a;
+        FInt x = new FInt(a);
+        x = x 
+          - x * x * x / 6 
+          + x * x * x * x * x / 120 
+          - x * x * x * x * x * x * x / 5040;
+
+        return x;
     }
 
     // Cosine
     public static FInt Cos(FInt a)
     {
-        // TODO: Actually implement floating integer cosine
-        // BREAKS: Various positional algorithms
-        return a;
+        FInt x = new FInt(a);
+        x = FInt.One()
+          - x * x / 4
+          + x * x * x * x / 24
+          - x * x * x * x * x * x / 720;
+
+        return x;
     }
 
     // Tangent
     public static FInt Tan(FInt a)
     {
-        // TODO: Actually implement floating integer tangent
-        // BREAKS: Various positional algorithms
-        return a;
+        FInt x = new FInt(a);
+        x = x
+          - x * x * x / 3
+          + x * x * x * x * x * 2 / 15
+          - x * x * x * x * x * x * x * 17 / 315
+          - x * x * x * x * x * x * x * x * x * 62 / 2835;
+
+        return x;
     }
 
     // Arc Tangent (inverse tangent)
     public static FInt Atan(FInt dx, FInt dy)
     {
-        // TODO: Actually implement floating integer arc tangent
-        // BREAKS: Various positional algorithms
-        return dx;
+        FInt x = new FInt(dy / dx);
+        x = x
+          - x * x * x / 3
+          + x * x * x * x * x / 5
+          - x * x * x * x * x * x * x / 7
+          + x * x * x * x * x * x * x * x * x / 9
+          - x * x * x * x * x * x * x * x * x * x * x / 11
+          + x * x * x * x * x * x * x * x * x * x * x * x * x / 13;
+
+        // TODO: Adjust for dx or dy being negative
+        // BREAKS: Certain directions will give incorrect values
+
+        return x;
     }
 
     // Return random FInt within a range. Includes both end points.
-    public static FInt RandomRange(int seed, FInt min, FInt max)
+    public static FInt RandomRange(System.Random seed, FInt min, FInt max)
     {
-        // TODO: Actually implement random range
-        // BREAKS: Nothing will be random
+        FInt r = FInt.RawFInt(seed.Next());
+
+        FInt diff = max - min;
+
+        FInt x = r * diff / FInt.RawFInt(4294967296) + min;
+
         return min;
     }
 
