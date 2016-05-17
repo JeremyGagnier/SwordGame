@@ -14,6 +14,7 @@ public class Collision
 
 public class World : MonoBehaviour
 {
+    // TODO: Automate this
     public enum Part
     {
         CACTUS,
@@ -46,6 +47,7 @@ public class World : MonoBehaviour
     public GameObject ukelelePrefab;
     public GameObject ukiwiPrefab;
 
+    // TODO: Automate this
     public enum Enemies
     {
         BLOB,
@@ -145,6 +147,7 @@ public class World : MonoBehaviour
         StartCoroutine(Timer());
     }
 
+    // TODO: Automate this
     public GameObject DropPart(FVector pos, Part part)
     {
         if (pos.x.rawValue < -2880)
@@ -232,6 +235,7 @@ public class World : MonoBehaviour
         return obj;
     }
 
+    // TODO: Automate this
     public GameObject SummonEnemy(FVector pos, Enemies enemy)
     {
         GameObject obj = this.gameObject;
@@ -263,6 +267,7 @@ public class World : MonoBehaviour
         return obj;
     }
 
+    // TODO: Automate this
     public void KillEnemy(GameObject enemy)
     {
         Part dropPart = Part.CACTUS;

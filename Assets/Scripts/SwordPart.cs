@@ -4,21 +4,36 @@ using System.Collections;
 public class SwordPart : MonoBehaviour
 {
     public int rarity;
-    public FVector position;
+    // TODO: Make parent and player set properly
+    // BREAKS: Sword part functionality
+    private SwordPart parent;
+    private Player player;
     public FInt rotation;
     public FInt weight;
     public FInt damage;
+    // TODO: Add radius property and fix sword part prefabs
+    // BREAKS: Sword collisions
+    public FInt radius;
     public Node[] nodePoints;
-    public FInt truex = FInt.Zero();
-    public FInt truey = FInt.Zero();
+    public FInt depthInSword = FInt.Zero();
     public Node consumedNode;
 
-    // Recursively calculates the GLOBAL position of a sword part
-    public static FVector Position(Sword s, SwordPart p)
+    private FVector _position;
+    public FVector position
     {
-        // TODO: Implement the recursive calculation
-        // BREAKS: Sword part collisions
-        return new FVector();
+        get
+        {
+            // The sword part is the hilt if there is no parent
+            if (parent == null)
+            {
+                return player.position;
+            }
+            return _position + parent.position;
+        }
+        set
+        {
+            _position = value;
+        }
     }
 
     void Awake()
@@ -49,7 +64,7 @@ public class SwordPart : MonoBehaviour
         transform.localEulerAngles = new Vector3(0, 0, rotation.ToFloat() * 180.0f / Mathf.PI);
         transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
 
-        // TODO: Find truey via recursive transformations
+        // TODO: Find depthInSword via recursive transformations
         // BREAKS: Proper sword construction
         /*
         Vector3 localrot = sword.transform.localEulerAngles;
@@ -58,5 +73,10 @@ public class SwordPart : MonoBehaviour
         truey = diff.y;
         sword.transform.localEulerAngles = localrot;
          */
+    }
+
+    public void Attack(World world)
+    {
+        world.Attack(player.team, position, radius, player.position, damage, FInt.Zero(), null);
     }
 }

@@ -53,6 +53,8 @@ public class Sword : MonoBehaviour
             float pct = (swingDuration / maxDuration).ToFloat();
             switch (state)
             {
+                // TODO: Make the sword have FInt rotations and positions
+                // BREAKS: Sword position/movement
                 case SwingState.STAB:
                     // Move in accordance with stabbing
                     transform.localPosition = new Vector3(150 * (1 - pct) * Mathf.Cos(angle.ToFloat() + Mathf.PI / 2),
@@ -117,21 +119,23 @@ public class Sword : MonoBehaviour
 
         Node n = freeNodes[0];
         FInt w = FInt.Zero();
+        // First iteration counts the weight
         foreach (Node m in freeNodes)
         {
-            if (m.parent.truey.rawValue < 0) continue;
-            w += new FInt(1.0f) + m.parent.truey * m.parent.truey;
+            if (m.parent.depthInSword.rawValue < 0) continue;
+            w += new FInt(1.0f) + m.parent.depthInSword * m.parent.depthInSword;
         }
         if (w.rawValue == 0)
         {
             return;
         }
-        FInt choose = FInt.RandomRange(null, FInt.Zero(), w);
+        FInt choose = FInt.RandomRange(NetworkingManager.seed, FInt.Zero(), w);
+        // Second iteration finds the part at a random weight
         w = FInt.Zero();
         foreach (Node m in freeNodes)
         {
-            if (m.parent.truey.rawValue < 0) continue;
-            w += new FInt(1.0f) + m.parent.truey * m.parent.truey;
+            if (m.parent.depthInSword.rawValue < 0) continue;
+            w += new FInt(1.0f) + m.parent.depthInSword * m.parent.depthInSword;
             if (choose <= w)
             {
                 n = m;
@@ -177,8 +181,8 @@ public class Sword : MonoBehaviour
         parts.RemoveAt(parts.Count - 1);
 
         part.transform.SetParent(world.transform);
-        FInt randangle = FInt.RandomRange(null, FInt.Zero(), new FInt(2.0f * 3.14159f));
-        FInt randdist = FInt.RandomRange(null, new FInt(3.0f) * Player.PRADIUS, new FInt(6.0f) * Player.PRADIUS);
+        FInt randangle = FInt.RandomRange(NetworkingManager.seed, FInt.Zero(), new FInt(2.0f * 3.14159f));
+        FInt randdist = FInt.RandomRange(NetworkingManager.seed, new FInt(3.0f) * Player.PRADIUS, new FInt(6.0f) * Player.PRADIUS);
         FVector position = new FVector(owner.position.x + randdist * FInt.Cos(randangle),
                                        owner.position.y + randdist * FInt.Sin(randangle));
 
@@ -209,7 +213,7 @@ public class Sword : MonoBehaviour
         parts.Add(hilt);
         foreach (SwordPart part in parts)
         {
-            world.Attack(owner.team, SwordPart.Position(this, part), FInt.Zero(), owner.position, FInt.Sqrt(damage), weight, null);
+            part.Attack(world);
         }
         parts.Remove(hilt);
     }

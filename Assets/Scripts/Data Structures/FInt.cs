@@ -238,12 +238,8 @@ public class FInt : ISerializationCallbackReceiver
     public static FInt RandomRange(System.Random seed, FInt min, FInt max)
     {
         FInt r = FInt.RawFInt(seed.Next());
-
         FInt diff = max - min;
-
-        FInt x = r * diff / FInt.RawFInt(4294967296) + min;
-
-        return min;
+        return (r * diff) / FInt.RawFInt(4294967296) + min;
     }
 
     public int ToInt()
