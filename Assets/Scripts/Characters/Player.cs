@@ -35,7 +35,7 @@ public class Player : Character
 
     public FInt speed
     {
-        get { return FInt.Max(new FInt(100.0f) - sword.weight, new FInt(10.0f)) * new FInt(5.0f); }
+        get { return FInt.Max(new FInt(100.0f) - sword.weight, new FInt(10.0f)); }
     }
 
     void Start()
@@ -186,24 +186,6 @@ public class Player : Character
             characterImg.transform.localPosition = new Vector3(-30, 118, 0);
             characterImg.transform.localScale = new Vector3(-1, 1, 1);
             characterMask.transform.localScale = new Vector3(-1, 1, 1);
-        }
-
-        // Keep bounds in map
-        if (position.x.rawValue < -2880)
-        {
-            position.x.rawValue = -2880;
-        }
-        if (position.x.rawValue > 2880)
-        {
-            position.x.rawValue = 2880;
-        }
-        if (position.y.rawValue < -2160)
-        {
-            position.y.rawValue = -2160;
-        }
-        if (position.y.rawValue > 2160)
-        {
-            position.y.rawValue = 2160;
         }
 
         base.Update();

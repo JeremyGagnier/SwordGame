@@ -44,8 +44,11 @@ public class SwordPart : MonoBehaviour
         }
     }
 
-    public void Attach(Node attachPoint, int myPoint, GameObject sword)
+    public void Attach(Node attachPoint, int myPoint, GameObject sword, Player player)
     {
+        this.player = player;
+        this.parent = attachPoint.parent;
+
         // Attach this sword part by making the node point at myPoint
         // equivelant to the attach point
         FInt a1 = FInt.Atan(nodePoints[myPoint].dir.x, nodePoints[myPoint].dir.y);

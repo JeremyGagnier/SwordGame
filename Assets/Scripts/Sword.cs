@@ -145,7 +145,7 @@ public class Sword : MonoBehaviour
 
         part.transform.SetParent(n.parent.transform);
         int attachPoint = Random.Range(0, swordPart.nodePoints.Length);
-        swordPart.Attach(n, attachPoint, this.gameObject);
+        swordPart.Attach(n, attachPoint, this.gameObject, owner);
         freeNodes.Remove(n);
         swordPart.consumedNode = n;
         for (int i = 0; i < swordPart.nodePoints.Length; ++i)
