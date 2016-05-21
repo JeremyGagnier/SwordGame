@@ -6,14 +6,15 @@ using System.Collections.Generic;
 
 public class Collision
 {
-    public static float dist(float x1, float y1, float x2, float y2)
+    public static FInt dist(FInt x1, FInt y1, FInt x2, FInt y2)
     {
-        return Mathf.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+        return FInt.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
     }
 }
 
 public class World : MonoBehaviour
 {
+    // TODO: Automate this
     public enum Part
     {
         CACTUS,
@@ -46,6 +47,7 @@ public class World : MonoBehaviour
     public GameObject ukelelePrefab;
     public GameObject ukiwiPrefab;
 
+    // TODO: Automate this
     public enum Enemies
     {
         BLOB,
@@ -71,10 +73,10 @@ public class World : MonoBehaviour
     public GameObject p2Object;
     public GameObject p3Object;
     public GameObject p4Object;
-    private Player player1;
-    private Player player2;
-    private Player player3;
-    private Player player4;
+    public Player player1;
+    public Player player2;
+    public Player player3;
+    public Player player4;
 
     public int numPlayers;
     public int timeLeft;
@@ -100,9 +102,9 @@ public class World : MonoBehaviour
         this.numPlayers = numPlayers;
 
         p1Object.SetActive(true);
-        player1.Setup(this, -300, 0, 1, 1);
+        player1.Setup(this, new FInt(-300), new FInt(0), 1, 1);
         p2Object.SetActive(true);
-        player2.Setup(this, 300, 0, 2, 2);
+        player2.Setup(this, new FInt(300), new FInt(0), 2, 2);
         if (numPlayers == 2)
         {
             p1Camera1.SetActive(true);
@@ -122,7 +124,7 @@ public class World : MonoBehaviour
         {
             p3Camera.SetActive(true);
             p3Object.SetActive(true);
-            player3.Setup(this, 0, -300, 3, 3);
+            player3.Setup(this, new FInt(0), new FInt(-300), 3, 3);
         }
         else
         {
@@ -134,7 +136,7 @@ public class World : MonoBehaviour
         {
             p4Camera.SetActive(true);
             p4Object.SetActive(true);
-            player4.Setup(this, 0, 300, 4, 4);
+            player4.Setup(this, new FInt(0), new FInt(300), 4, 4);
         }
         else
         {
@@ -145,23 +147,24 @@ public class World : MonoBehaviour
         StartCoroutine(Timer());
     }
 
-    public GameObject DropPart(Vector2 pos, Part part)
+    // TODO: Automate this
+    public GameObject DropPart(FVector pos, Part part)
     {
-        if (pos.x < -2880)
+        if (pos.x.rawValue < -2880)
         {
-            pos.x = -2880;
+            pos.x.rawValue = -2880;
         }
-        if (pos.x > 2880)
+        if (pos.x.rawValue > 2880)
         {
-            pos.x = 2880;
+            pos.x.rawValue = 2880;
         }
-        if (pos.y < -2160)
+        if (pos.y.rawValue < -2160)
         {
-            pos.y = -2160;
+            pos.y.rawValue = -2160;
         }
-        if (pos.y > 2160)
+        if (pos.y.rawValue > 2160)
         {
-            pos.y = 2160;
+            pos.y.rawValue = 2160;
         }
         GameObject obj = this.gameObject;
         switch (part)
@@ -223,14 +226,17 @@ public class World : MonoBehaviour
                 //obj.name = "Flower";
                 break;
         }
+        SwordPart objPart = obj.GetComponent<SwordPart>();
+        objPart.position = pos;
         obj.transform.SetParent(this.transform);
-        obj.transform.position = new Vector3(pos.x, pos.y);
+        obj.transform.position = new Vector3(pos.x.ToFloat(), pos.y.ToFloat());
         obj.transform.localScale = new Vector3(0.5f, 0.5f, 1.0f);
         swordParts.Add(obj);
         return obj;
     }
 
-    public GameObject SummonEnemy(Vector2 pos, Enemies enemy)
+    // TODO: Automate this
+    public GameObject SummonEnemy(FVector pos, Enemies enemy)
     {
         GameObject obj = this.gameObject;
         switch (enemy)
@@ -254,13 +260,14 @@ public class World : MonoBehaviour
         }
         obj.transform.SetParent(this.transform);
         Enemy e = obj.GetComponent<Enemy>();
-        e.posx = pos.x;
-        e.posy = pos.y;
+        e.position.x = pos.x;
+        e.position.y = pos.y;
         e.world = this;
         enemies.Add(obj);
         return obj;
     }
 
+    // TODO: Automate this
     public void KillEnemy(GameObject enemy)
     {
         Part dropPart = Part.CACTUS;
@@ -295,7 +302,7 @@ public class World : MonoBehaviour
             if (pick == 1) dropPart = Part.UKIWI;
             if (pick == 2) dropPart = Part.LIGHTSABER;
         }
-        DropPart(new Vector2(enemy.transform.position.x, enemy.transform.position.y), dropPart);
+        DropPart(new FVector(e.position.x, e.position.y), dropPart);
 
         enemies.Remove(enemy);
         DestroyObject(enemy);
@@ -321,26 +328,26 @@ public class World : MonoBehaviour
             {
                 int choose = UnityEngine.Random.Range(0, 26);
                 int side = UnityEngine.Random.Range(0, 3);
-                Vector2 vec = new Vector2();
+                FVector vec = new FVector();
                 if (side == 0)
                 {
                     int slider = UnityEngine.Random.Range(0, 4320);
-                    vec = new Vector2(-2880, slider - 2160);
+                    vec = new FVector(new FInt(-2880), new FInt(slider - 2160));
                 }
                 if (side == 1)
                 {
                     int slider = UnityEngine.Random.Range(0, 5760);
-                    vec = new Vector2(slider - 2880, 2160);
+                    vec = new FVector(new FInt(slider - 2880), new FInt(2160));
                 }
                 if (side == 2)
                 {
                     int slider = UnityEngine.Random.Range(0, 4320);
-                    vec = new Vector2(2880, slider - 2160);
+                    vec = new FVector(new FInt(2880), new FInt(slider - 2160));
                 }
                 if (side == 3)
                 {
                     int slider = UnityEngine.Random.Range(0, 5760);
-                    vec = new Vector2(slider - 2880, -2160);
+                    vec = new FVector(new FInt(slider - 2880), new FInt(-2160));
                 }
 
                 if (choose == 0)
@@ -390,11 +397,11 @@ public class World : MonoBehaviour
         egt2.text = "Their sword had " + (winner_size + 1).ToString() + " parts";
     }
 
-    public void Attack(int sourceTeam, Transform source, float radius, Transform knockbackSource, float damage, float weight, Action callback)
+    public void Attack(int sourceTeam, FVector source, FInt radius, FVector knockbackSource, FInt damage, FInt weight, Action callback)
     {
         if (player1.team != sourceTeam &&
-            player1.invincibility <= 0.0f &&
-            Collision.dist(source.position.x, source.position.y, player1.posx, player1.posy) <= Player.PRADIUS + radius)
+            player1.invincibility.rawValue <= 0 &&
+            Collision.dist(source.x, source.y, player1.position.x, player1.position.y) <= Player.PRADIUS + radius)
         {
             player1.Damage(knockbackSource, damage, weight);
             if (callback != null)
@@ -404,8 +411,8 @@ public class World : MonoBehaviour
             }
         }
         if (player2.team != sourceTeam &&
-            player2.invincibility <= 0.0f &&
-            Collision.dist(source.position.x, source.position.y, player2.posx, player2.posy) <= Player.PRADIUS + radius)
+            player2.invincibility.rawValue <= 0 &&
+            Collision.dist(source.x, source.y, player2.position.x, player2.position.y) <= Player.PRADIUS + radius)
         {
             player2.Damage(knockbackSource, damage, weight);
             if (callback != null)
@@ -415,8 +422,8 @@ public class World : MonoBehaviour
             }
         }
         if (player3.team != sourceTeam &&
-            player3.invincibility <= 0.0f &&
-            Collision.dist(source.position.x, source.position.y, player3.posx, player3.posy) <= Player.PRADIUS + radius)
+            player3.invincibility.rawValue <= 0 &&
+            Collision.dist(source.x, source.y, player3.position.x, player3.position.y) <= Player.PRADIUS + radius)
         {
             player3.Damage(knockbackSource, damage, weight);
             if (callback != null)
@@ -426,8 +433,8 @@ public class World : MonoBehaviour
             }
         }
         if (player4.team != sourceTeam &&
-            player4.invincibility <= 0.0f &&
-            Collision.dist(source.position.x, source.position.y, player4.posx, player4.posy) <= Player.PRADIUS + radius)
+            player4.invincibility.rawValue <= 0 &&
+            Collision.dist(source.x, source.y, player4.position.x, player4.position.y) <= Player.PRADIUS + radius)
         {
             player4.Damage(knockbackSource, damage, weight);
             if (callback != null)
@@ -441,8 +448,8 @@ public class World : MonoBehaviour
         {
             Enemy e = enemy.GetComponent<Enemy>();
             if (e.team != sourceTeam &&
-                e.invincibility <= 0.0f &&
-                Collision.dist(source.position.x, source.position.y, e.posx, e.posy) <= e.radius + radius)
+                e.invincibility.rawValue <= 0 &&
+                Collision.dist(source.x, source.y, e.position.x, e.position.y) <= e.radius + radius)
             {
                 e.Damage(knockbackSource, damage, weight);
                 if (callback != null)
