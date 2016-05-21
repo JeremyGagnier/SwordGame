@@ -219,6 +219,18 @@ public class FInt : ISerializationCallbackReceiver
     // Arc Tangent (inverse tangent)
     public static FInt Atan(FInt dx, FInt dy)
     {
+        if (dx.rawValue == 0)
+        {
+            if (dy.rawValue >= 0)
+            {
+                return new FInt(3.14 * 0.5);
+            }
+            else
+            {
+                return new FInt(3.14 * 1.5);
+            }
+        }
+
         FInt x = new FInt(dy / dx);
         x = x
           - x * x * x / 3
@@ -226,10 +238,16 @@ public class FInt : ISerializationCallbackReceiver
           - x * x * x * x * x * x * x / 7
           + x * x * x * x * x * x * x * x * x / 9
           - x * x * x * x * x * x * x * x * x * x * x / 11
-          + x * x * x * x * x * x * x * x * x * x * x * x * x / 13;
-
-        // TODO: Adjust for dx or dy being negative
-        // BREAKS: Certain directions will give incorrect values
+          + x * x * x * x * x * x * x * x * x * x * x * x * x / 13
+          - x * x * x * x * x * x * x * x * x * x * x * x * x * x * x / 15
+          + x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x / 17
+          - x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x / 19
+          + x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x / 21;
+         
+        if (dx.rawValue < 0)
+        {
+            x += new FInt(3.14);
+        }
 
         return x;
     }
