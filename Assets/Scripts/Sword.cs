@@ -39,6 +39,7 @@ public class Sword : MonoBehaviour
 
     void Start()
     {
+        hilt.player = owner;
         freeNodes.Add(hilt.nodePoints[0]);
         weight = hilt.weight;
         damage = hilt.damage;
@@ -50,26 +51,30 @@ public class Sword : MonoBehaviour
         {
             hilt.gameObject.SetActive(true);
             swingDuration -= Game.TIMESTEP;
-            float pct = (swingDuration / maxDuration).ToFloat();
+            FInt pct = swingDuration / maxDuration;
             switch (state)
             {
                 // TODO: Make the sword have FInt rotations and positions
                 // BREAKS: Sword position/movement
                 case SwingState.STAB:
+                    position.x = 150 * (FInt.One() - pct) * FInt.Cos(angle) + FInt.PI() / 2;
+                    position.y = new FInt(61) + 150 * (FInt.One() - pct) * FInt.Sin(angle) + FInt.PI() / 2;
+
                     // Move in accordance with stabbing
-                    transform.localPosition = new Vector3(150 * (1 - pct) * Mathf.Cos(angle.ToFloat() + Mathf.PI / 2),
-                                                          61 + 150 * (1 - pct) * Mathf.Sin(angle.ToFloat() + Mathf.PI / 2));
+                    transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
                     transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI);
                     break;
                 case SwingState.CWISE:
-                    transform.localPosition = new Vector3(150 * Mathf.Cos(angle.ToFloat() + Mathf.PI / 2 + Mathf.PI / 2 * (1 - pct)),
-                                                          61 + 150 * Mathf.Sin(angle.ToFloat() + Mathf.PI / 2 + Mathf.PI / 2 * (1 - pct)));
-                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI + 90 * (1 - pct));
+                    position.x = 150 * FInt.Cos(angle) + (new FInt(2) - pct) * FInt.PI() / 2;
+                    position.y = new FInt(61) + 150 * FInt.Sin(angle) + (new FInt(2) - pct) * FInt.PI() / 2;
+                    transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
+                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI + 90 * (1 - pct.ToFloat()));
                     break;
                 case SwingState.CCWISE:
-                    transform.localPosition = new Vector3(150 * Mathf.Cos(angle.ToFloat() + Mathf.PI / 2 - Mathf.PI / 2 * (1 - pct)),
-                                                          61 + 150 * Mathf.Sin(angle.ToFloat() + Mathf.PI / 2 - Mathf.PI / 2 * (1 - pct)));
-                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI - 90 * (1 - pct));
+                    position.x = 150 * FInt.Cos(angle + pct * FInt.PI() / 2);
+                    position.y = new FInt(61) + 150 * FInt.Sin(angle + pct * FInt.PI() / 2);
+                    transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
+                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI - 90 * (1 - pct.ToFloat()));
                     break;
 
             }
@@ -102,10 +107,10 @@ public class Sword : MonoBehaviour
         switch (state)
         {
             case SwingState.STAB:
-                angle = swingAngle - new FInt(3.1415f / 2.0f);
+                angle = swingAngle - FInt.PI() / 2;
                 break;
             case SwingState.CWISE:
-                angle = swingAngle - new FInt(3.1415f);
+                angle = swingAngle - FInt.PI();
                 break;
             case SwingState.CCWISE:
                 angle = swingAngle;

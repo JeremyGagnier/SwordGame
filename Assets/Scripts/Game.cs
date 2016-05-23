@@ -3,5 +3,5 @@ using System.Collections;
 
 public class Game : MonoBehaviour
 {
-    public static FInt TIMESTEP = new FInt(0.1666f);
+    public static FInt TIMESTEP = new FInt(0.01666f);
 }

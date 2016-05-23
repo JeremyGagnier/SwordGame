@@ -130,6 +130,11 @@ public class FInt : ISerializationCallbackReceiver
         return new FInt(1);
     }
 
+    public static FInt PI()
+    {
+        return new FInt(3.14159);
+    }
+
     // Largest signed long
     public static FInt Max()
     {
@@ -223,11 +228,11 @@ public class FInt : ISerializationCallbackReceiver
         {
             if (dy.rawValue >= 0)
             {
-                return new FInt(3.14 * 0.5);
+                return new FInt(0.5) * PI();
             }
             else
             {
-                return new FInt(3.14 * 1.5);
+                return new FInt(1.5) * PI();
             }
         }
 
@@ -246,7 +251,7 @@ public class FInt : ISerializationCallbackReceiver
          
         if (dx.rawValue < 0)
         {
-            x += new FInt(3.14);
+            x += PI();
         }
 
         return x;

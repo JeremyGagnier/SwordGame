@@ -7,7 +7,7 @@ using System.Collections;
 [ExecuteInEditMode]
 public class Tests : MonoBehaviour
 {
-    private static bool DEBUG = false;
+    public bool DEBUG = false;
     private int numTests;
     void Update()
     {
@@ -20,23 +20,55 @@ public class Tests : MonoBehaviour
             "Test Atan for zero");
         Test<FInt>(
             () => { return FInt.Atan(new FInt(-1), new FInt(0)); },
-            new FInt(3.14),
+            FInt.PI(),
             "Test Atan for pi");
-        Test<FInt>(
+        RangeTest(
             () => { return FInt.Atan(new FInt(-1), new FInt(1)); },
-            new FInt(2.33193),
+            3 * FInt.PI() / 4,
+            new FInt(0.1),
             "Test Atan for 3*pi/4");
-        Test<FInt>(
+        RangeTest(
             () => { return FInt.Atan(new FInt(1), new FInt(1)); },
-            new FInt(0.80808),
+            FInt.PI() / 4,
+            new FInt(0.1),
             "Test Atan for pi/4");
     }
 
-    private void Test<T>(Func<T> test, T expected, string description = "")
+    private void Test<T>(
+        Func<T> test,
+        T expected,
+        string description = "")
     {
         numTests += 1;
         T result = test();
         if (!result.Equals(expected))
+        {
+            Debug.LogError(
+                "Test #" +
+                numTests.ToString() +
+                " has failed. Gave: " +
+                result.ToString() +
+                ", expected: " +
+                expected.ToString() +
+                ". " +
+                description);
+        }
+        else if (DEBUG)
+        {
+            Debug.Log("Test #" + numTests.ToString() + " has passed.");
+        }
+    }
+
+    private void RangeTest(
+        Func<FInt> test,
+        FInt expected,
+        FInt tolerance,
+        string description = "")
+    {
+        numTests += 1;
+        FInt result = test();
+        if (result > expected + tolerance ||
+            result < expected - tolerance)
         {
             Debug.LogError(
                 "Test #" +

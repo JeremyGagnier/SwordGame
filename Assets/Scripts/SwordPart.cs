@@ -6,8 +6,8 @@ public class SwordPart : MonoBehaviour
     public int rarity;
     // TODO: Make parent and player set properly
     // BREAKS: Sword part functionality
-    private SwordPart parent;
-    private Player player;
+    public SwordPart parent;
+    public Player player;
     public FInt rotation;
     public FInt weight;
     public FInt damage;
