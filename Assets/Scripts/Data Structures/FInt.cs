@@ -171,15 +171,10 @@ public class FInt : ISerializationCallbackReceiver
     public static FInt Sqrt(FInt a)
     {
         FInt x = FInt.One();
-        long rx = x.rawValue;
-        long ax = a.rawValue;
-
         for (int i = 0; i < 64; i++)
         {
-            rx = (rx + ax / rx) / 2;
+            x = (x + a / x) / 2;
         }
-
-        x.rawValue = rx;
 
         return x;
     }
@@ -187,31 +182,50 @@ public class FInt : ISerializationCallbackReceiver
     // Sin
     public static FInt Sin(FInt a)
     {
-        FInt x = new FInt(a);
+        FInt x = a % (2 * PI());
+        bool overPi = x > PI();
+        if (overPi)
+        {
+            x -= PI();
+        }
         x = x 
           - x * x * x / 6 
           + x * x * x * x * x / 120 
-          - x * x * x * x * x * x * x / 5040;
-
+          - x * x * x * x * x * x * x / 5040
+          + x * x * x * x * x * x * x * x * x / 362880;
+        if (overPi)
+        {
+            x = -x;
+        }
         return x;
     }
 
     // Cosine
     public static FInt Cos(FInt a)
     {
-        FInt x = new FInt(a);
+        FInt x = a % (2 * PI());
+        bool overPi = x > PI();
+        if (overPi)
+        {
+            x -= PI();
+        }
         x = FInt.One()
-          - x * x / 4
+          - x * x / 2
           + x * x * x * x / 24
-          - x * x * x * x * x * x / 720;
-
+          - x * x * x * x * x * x / 720
+          + x * x * x * x * x * x * x * x / 40320
+          - x * x * x * x * x * x * x * x * x * x / 3628800;
+        if (overPi)
+        {
+            x = -x;
+        }
         return x;
     }
 
     // Tangent
     public static FInt Tan(FInt a)
     {
-        FInt x = new FInt(a);
+        FInt x = a % (2 * PI());
         x = x
           - x * x * x / 3
           + x * x * x * x * x * 2 / 15
@@ -222,6 +236,7 @@ public class FInt : ISerializationCallbackReceiver
     }
 
     // Arc Tangent (inverse tangent)
+    // Uses GBA implementation: http://www.coranac.com/documents/arctangent/
     public static FInt Atan(FInt dx, FInt dy)
     {
         if (dx.rawValue == 0)
@@ -235,25 +250,62 @@ public class FInt : ISerializationCallbackReceiver
                 return new FInt(1.5) * PI();
             }
         }
-
-        FInt x = new FInt(dy / dx);
-        x = x
-          - x * x * x / 3
-          + x * x * x * x * x / 5
-          - x * x * x * x * x * x * x / 7
-          + x * x * x * x * x * x * x * x * x / 9
-          - x * x * x * x * x * x * x * x * x * x * x / 11
-          + x * x * x * x * x * x * x * x * x * x * x * x * x / 13
-          - x * x * x * x * x * x * x * x * x * x * x * x * x * x * x / 15
-          + x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x / 17
-          - x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x / 19
-          + x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x * x / 21;
-         
+        if (dy.rawValue == 0)
+        {
+            if (dx.rawValue > 0)
+            {
+                return FInt.Zero();
+            }
+            else
+            {
+                return PI();
+            }
+        }
+        
         if (dx.rawValue < 0)
         {
-            x += PI();
+            if (dy.rawValue < 0)
+            {
+                return PI() + Atan(-dx, -dy);
+            }
+            else
+            {
+                return PI() - Atan(-dx, dy);
+            }
+        }
+        else
+        {
+            if (dy.rawValue < 0)
+            {
+                return 2 * PI() - Atan(dx, -dy);
+            }
         }
 
+        bool swapAxes = false;
+        if (dy > dx)
+        {
+            FInt tmp = dy;
+            dy = dx;
+            dx = tmp;
+            swapAxes = true;
+        }
+
+        long t = (dy.rawValue << FLOATING_BITS) / dx.rawValue;
+        long t2 = -(t * t) >> FLOATING_BITS;
+        long dphi = 65536;
+        dphi = 21845 + (t2 * dphi) >> FLOATING_BITS;
+        dphi = 13107 + (t2 * dphi) >> FLOATING_BITS;
+        dphi = 9102  + (t2 * dphi) >> FLOATING_BITS;
+        dphi = 6317  + (t2 * dphi) >> FLOATING_BITS;
+        dphi = 3664  + (t2 * dphi) >> FLOATING_BITS;
+        dphi = 1432  + (t2 * dphi) >> FLOATING_BITS;
+        dphi = 266   + (t2 * dphi) >> FLOATING_BITS;
+
+        FInt x = -RawFInt(dphi) * PI() / 4;
+        if (swapAxes)
+        {
+            return PI() / 2 - x;
+        }
         return x;
     }
 
@@ -360,6 +412,13 @@ public class FInt : ISerializationCallbackReceiver
     {
         FInt z = new FInt();
         z.rawValue = x.rawValue / y;
+        return z;
+    }
+
+    public static FInt operator %(FInt x, FInt y)
+    {
+        FInt z = new FInt();
+        z.rawValue = x.rawValue % y.rawValue;
         return z;
     }
 

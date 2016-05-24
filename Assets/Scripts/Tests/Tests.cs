@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System;
-using System.Collections;
-
 
 [ExecuteInEditMode]
 public class Tests : MonoBehaviour
@@ -25,13 +23,69 @@ public class Tests : MonoBehaviour
         RangeTest(
             () => { return FInt.Atan(new FInt(-1), new FInt(1)); },
             3 * FInt.PI() / 4,
-            new FInt(0.1),
+            new FInt(0.01),
             "Test Atan for 3*pi/4");
         RangeTest(
             () => { return FInt.Atan(new FInt(1), new FInt(1)); },
             FInt.PI() / 4,
-            new FInt(0.1),
+            new FInt(0.01),
             "Test Atan for pi/4");
+        RangeTest(
+            () => { return FInt.Atan(new FInt(1), new FInt(1000)); },
+            FInt.PI() / 2,
+            new FInt(0.01),
+            "Test Atan for values close to pi/2");
+
+        Test(
+            () => { return FInt.Sin(FInt.Zero()); },
+            FInt.Zero(),
+            "Test Sin for zero");
+        RangeTest(
+            () => { return FInt.Sin(FInt.PI() / 2); },
+            FInt.One(),
+            new FInt(0.01),
+            "Test Sin for one");
+        RangeTest(
+            () => { return FInt.Sin(FInt.PI() / 4); },
+            FInt.Sqrt(new FInt(2)) / 2,
+            new FInt(0.01),
+            "Test Sin for sqrt(2) / 2");
+        RangeTest(
+            () => { return FInt.Sin(-FInt.PI() / 4); },
+            -FInt.Sqrt(new FInt(2)) / 2,
+            new FInt(0.01),
+            "Test Sin for -sqrt(2) / 2. This one is through -pi / 4");
+        RangeTest(
+            () => { return FInt.Sin(7 * FInt.PI() / 4); },
+            -FInt.Sqrt(new FInt(2)) / 2,
+            new FInt(0.01),
+            "Test Sin for -sqrt(2) / 2. This one is through 7 * pi / 4");
+
+        Test(
+            () => { return FInt.Cos(FInt.Zero()); },
+            FInt.One(),
+            "Test Cos for one");
+        RangeTest(
+            () => { return FInt.Cos(FInt.PI() / 2); },
+            FInt.Zero(),
+            new FInt(0.01),
+            "Test Cos for zero");
+        RangeTest(
+            () => { return FInt.Cos(FInt.PI()); },
+            -FInt.One(),
+            new FInt(0.01),
+            "Test Cos for -1");
+        RangeTest(
+            () => { return FInt.Cos(-FInt.PI() / 4); },
+            FInt.Sqrt(new FInt(2)) / 2,
+            new FInt(0.01),
+            "Test Cos for -sqrt(2) / 2. This one is through -pi / 4");
+        RangeTest(
+            () => { return FInt.Cos(7 * FInt.PI() / 4); },
+            FInt.Sqrt(new FInt(2)) / 2,
+            new FInt(0.01),
+            "Test Cos for -sqrt(2) / 2. This one is through 7 * pi / 4");
+
     }
 
     private void Test<T>(
@@ -55,7 +109,7 @@ public class Tests : MonoBehaviour
         }
         else if (DEBUG)
         {
-            Debug.Log("Test #" + numTests.ToString() + " has passed.");
+            Debug.Log("Test #" + numTests.ToString() + " has passed. " + description);
         }
     }
 
@@ -82,7 +136,7 @@ public class Tests : MonoBehaviour
         }
         else if (DEBUG)
         {
-            Debug.Log("Test #" + numTests.ToString() + " has passed.");
+            Debug.Log("Test #" + numTests.ToString() + " has passed. " + description);
         }
     }
 }
