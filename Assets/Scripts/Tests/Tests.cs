@@ -3,20 +3,34 @@ using UnityEditor;
 using System;
 
 [ExecuteInEditMode]
-public class Tests : MonoBehaviour
+public class Tests : EditorWindow
 {
-    public bool DEBUG = false;
+    public bool debug = false;
     private int numTests;
-    void Update()
-    {
-        if (EditorApplication.isPlaying) return;
 
+    [MenuItem("SwordGame/Tests")]
+    public static void ShowWindow()
+    {
+        GetWindow(typeof(Tests));
+    }
+
+    void OnGUI()
+    {
+        debug = GUILayout.Toggle(debug, "Print Successes");
+        if (GUILayout.Button("Run Tests"))
+        {
+            RunTests();
+        }
+    }
+
+    void RunTests()
+    {
         numTests = 0;
-        Test<FInt>(
+        Test(
             () => { return FInt.Atan(new FInt(1), new FInt(0)); },
             FInt.Zero(),
             "Test Atan for zero");
-        Test<FInt>(
+        Test(
             () => { return FInt.Atan(new FInt(-1), new FInt(0)); },
             FInt.PI(),
             "Test Atan for pi");
@@ -35,6 +49,16 @@ public class Tests : MonoBehaviour
             FInt.PI() / 2,
             new FInt(0.01),
             "Test Atan for values close to pi/2");
+        RangeTest(
+            () => { return FInt.Atan(new FInt(2), new FInt(1)); },
+            new FInt(0.46365),
+            new FInt(0.01),
+            "Test Atan for 0.46365");
+        RangeTest(
+            () => { return FInt.Atan(new FInt(1), new FInt(2)); },
+            new FInt(1.10715),
+            new FInt(0.01),
+            "Test Atan for 1.10715");
 
         Test(
             () => { return FInt.Sin(FInt.Zero()); },
@@ -107,7 +131,7 @@ public class Tests : MonoBehaviour
                 ". " +
                 description);
         }
-        else if (DEBUG)
+        else if (debug)
         {
             Debug.Log("Test #" + numTests.ToString() + " has passed. " + description);
         }
@@ -134,7 +158,7 @@ public class Tests : MonoBehaviour
                 ". " +
                 description);
         }
-        else if (DEBUG)
+        else if (debug)
         {
             Debug.Log("Test #" + numTests.ToString() + " has passed. " + description);
         }

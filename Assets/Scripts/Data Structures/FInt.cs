@@ -292,16 +292,22 @@ public class FInt : ISerializationCallbackReceiver
 
         long t = (dy.rawValue << FLOATING_BITS) / dx.rawValue;
         long t2 = -(t * t) >> FLOATING_BITS;
-        long dphi = 65536;
-        dphi = 21845 + (t2 * dphi) >> FLOATING_BITS;
-        dphi = 13107 + (t2 * dphi) >> FLOATING_BITS;
-        dphi = 9102  + (t2 * dphi) >> FLOATING_BITS;
-        dphi = 6317  + (t2 * dphi) >> FLOATING_BITS;
-        dphi = 3664  + (t2 * dphi) >> FLOATING_BITS;
-        dphi = 1432  + (t2 * dphi) >> FLOATING_BITS;
-        dphi = 266   + (t2 * dphi) >> FLOATING_BITS;
-
-        FInt x = -RawFInt(dphi) * PI() / 4;
+        long t4 = (t2 * t2) >> FLOATING_BITS;
+        long t6 = (t4 * t2) >> FLOATING_BITS;
+        long t8 = (t4 * t4) >> FLOATING_BITS;
+        long t10 = (t6 * t4) >> FLOATING_BITS;
+        long t12 = (t6 * t6) >> FLOATING_BITS;
+        long t14 = (t8 * t6) >> FLOATING_BITS;
+        FInt x = RawFInt(
+            ((65536 * t) >> FLOATING_BITS) +
+            ((((21845 * t) >> FLOATING_BITS) * t2) >> FLOATING_BITS) +
+            ((((13107 * t) >> FLOATING_BITS) * t4) >> FLOATING_BITS) +
+            ((((9102 * t) >> FLOATING_BITS) * t6) >> FLOATING_BITS) +
+            ((((6317 * t) >> FLOATING_BITS) * t8) >> FLOATING_BITS) +
+            ((((3664 * t) >> FLOATING_BITS) * t10) >> FLOATING_BITS) +
+            ((((1432 * t) >> FLOATING_BITS) * t12) >> FLOATING_BITS) +
+            ((((266 * t) >> FLOATING_BITS) * t14) >> FLOATING_BITS));
+        
         if (swapAxes)
         {
             return PI() / 2 - x;
