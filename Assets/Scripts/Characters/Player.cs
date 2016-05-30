@@ -35,7 +35,7 @@ public class Player : Character
 
     public FInt speed
     {
-        get { return FInt.Max(new FInt(100.0f) - sword.weight, new FInt(10.0f)); }
+        get { return 10 * FInt.Max(new FInt(100.0f) - sword.weight, new FInt(10.0f)); }
     }
 
     void Start()

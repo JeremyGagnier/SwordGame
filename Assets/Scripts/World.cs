@@ -46,19 +46,8 @@ public class World : MonoBehaviour
     public GameObject anchorPrefab;
     public GameObject ukelelePrefab;
     public GameObject ukiwiPrefab;
-
-    // TODO: Automate this
-    public enum Enemies
-    {
-        BLOB,
-        DOG,
-        GOOSE,
-        DINO
-    }
-    public GameObject blobPrefab;
-    public GameObject dogEnemyPrefab;
-    public GameObject goosePrefab;
-    public GameObject dinoPrefab;
+    
+    public List<GameObject> enemyPrefabs;
 
     public GameObject titleScreen;
 
@@ -236,32 +225,14 @@ public class World : MonoBehaviour
     }
 
     // TODO: Automate this
-    public GameObject SummonEnemy(FVector pos, Enemies enemy)
+    public GameObject SummonEnemy(FVector pos)
     {
-        GameObject obj = this.gameObject;
-        switch (enemy)
-        {
-            case Enemies.BLOB:
-                obj = Instantiate(blobPrefab) as GameObject;
-                obj.name = "Blob";
-                break;
-            case Enemies.DOG:
-                obj = Instantiate(dogEnemyPrefab) as GameObject;
-                obj.name = "Dog";
-                break;
-            case Enemies.GOOSE:
-                obj = Instantiate(goosePrefab) as GameObject;
-                obj.name = "Goose";
-                break;
-            case Enemies.DINO:
-                obj = Instantiate(dinoPrefab) as GameObject;
-                obj.name = "Dino";
-                break;
-        }
+        GameObject obj = Instantiate(enemyPrefabs[0]);
         obj.transform.SetParent(this.transform);
         Enemy e = obj.GetComponent<Enemy>();
         e.position.x = pos.x;
         e.position.y = pos.y;
+        e.transform.position = new Vector3(pos.x.ToFloat(), pos.y.ToFloat());
         e.world = this;
         enemies.Add(obj);
         return obj;
@@ -308,6 +279,7 @@ public class World : MonoBehaviour
         DestroyObject(enemy);
     }
 
+    // TODO: Remove vital game code, this isn't deterministic
     private IEnumerator Timer()
     {
         while (timeLeft > 0)
@@ -326,7 +298,6 @@ public class World : MonoBehaviour
 
             if (timeLeft > 110 && (timeLeft % (5 - numPlayers) == 0))
             {
-                int choose = UnityEngine.Random.Range(0, 26);
                 int side = UnityEngine.Random.Range(0, 3);
                 FVector vec = new FVector();
                 if (side == 0)
@@ -350,22 +321,7 @@ public class World : MonoBehaviour
                     vec = new FVector(new FInt(slider - 2880), new FInt(-2160));
                 }
 
-                if (choose == 0)
-                {
-                    SummonEnemy(vec, Enemies.DINO);
-                }
-                else if (choose <= 2)
-                {
-                    SummonEnemy(vec, Enemies.GOOSE);
-                }
-                else if (choose <= 8)
-                {
-                    SummonEnemy(vec, Enemies.DOG);
-                }
-                else if (choose <= 26)
-                {
-                    SummonEnemy(vec, Enemies.BLOB);
-                }
+                SummonEnemy(vec);
             }
         }
 

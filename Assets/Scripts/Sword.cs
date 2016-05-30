@@ -28,6 +28,7 @@ public class Sword : MonoBehaviour
     public List<SwordPart> parts = new List<SwordPart>();
 
     public FVector position;
+    public FInt rotation;
     public FInt weight;
     public FInt damage;
 
@@ -45,9 +46,11 @@ public class Sword : MonoBehaviour
         damage = hilt.damage;
     }
 
-    void Update()
+    // TODO: Call this from somewhere elses fixed update
+    // BREAKS: Multiplayer
+    void FixedUpdate()
     {
-        if (swingDuration.rawValue > 0)
+        if (swingDuration > Game.TIMESTEP)
         {
             hilt.gameObject.SetActive(true);
             swingDuration -= Game.TIMESTEP;
@@ -57,27 +60,23 @@ public class Sword : MonoBehaviour
                 // TODO: Make the sword have FInt rotations and positions
                 // BREAKS: Sword position/movement
                 case SwingState.STAB:
-                    position.x = 150 * (FInt.One() - pct) * FInt.Cos(angle) + FInt.PI() / 2;
-                    position.y = new FInt(61) + 150 * (FInt.One() - pct) * FInt.Sin(angle) + FInt.PI() / 2;
-
-                    // Move in accordance with stabbing
-                    transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
-                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI);
+                    position.x = 150 * (FInt.One() - pct) * FInt.Cos(angle + FInt.PI() / 2);
+                    position.y = new FInt(61) + 150 * (FInt.One() - pct) * FInt.Sin(angle + FInt.PI() / 2);
+                    rotation = angle;
                     break;
                 case SwingState.CWISE:
-                    position.x = 150 * FInt.Cos(angle) + (new FInt(2) - pct) * FInt.PI() / 2;
-                    position.y = new FInt(61) + 150 * FInt.Sin(angle) + (new FInt(2) - pct) * FInt.PI() / 2;
-                    transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
-                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI + 90 * (1 - pct.ToFloat()));
+                    position.x = 150 * FInt.Cos(angle + (new FInt(2) - pct) * FInt.PI() / 2);
+                    position.y = new FInt(61) + 150 * FInt.Sin(angle + (new FInt(2) - pct) * FInt.PI() / 2);
+                    rotation = angle + (-pct + 1) * FInt.PI() / 2;
                     break;
                 case SwingState.CCWISE:
                     position.x = 150 * FInt.Cos(angle + pct * FInt.PI() / 2);
                     position.y = new FInt(61) + 150 * FInt.Sin(angle + pct * FInt.PI() / 2);
-                    transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
-                    transform.localEulerAngles = new Vector3(0, 0, angle.ToFloat() * 180 / Mathf.PI - 90 * (1 - pct.ToFloat()));
+                    rotation = angle - (-pct + 1) * FInt.PI() / 2;
                     break;
-
             }
+            transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
+            transform.localEulerAngles = new Vector3(0, 0, rotation.ToFloat() * 180 / Mathf.PI);
             CheckCollisions();
         }
         else
