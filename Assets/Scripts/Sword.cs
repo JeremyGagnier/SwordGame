@@ -77,6 +77,7 @@ public class Sword : MonoBehaviour
             }
             transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
             transform.localEulerAngles = new Vector3(0, 0, rotation.ToFloat() * 180 / Mathf.PI);
+            hilt.position = position;
             CheckCollisions();
         }
         else

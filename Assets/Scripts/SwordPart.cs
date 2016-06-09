@@ -23,9 +23,14 @@ public class SwordPart : MonoBehaviour
     {
         get
         {
-            // The sword part is the hilt if there is no parent
+            // The sword part is the hilt (or on the ground) if there is no parent
             if (parent == null)
             {
+                // The sword part is on the ground if there is no player
+                if (player == null)
+                {
+                    return _position;
+                }
                 return player.position;
             }
             return _position + parent.position;
@@ -34,6 +39,12 @@ public class SwordPart : MonoBehaviour
         {
             _position = value;
         }
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawSphere(new Vector3(position.x.ToFloat(), position.y.ToFloat()), radius.ToFloat());
     }
 
     void Awake()
@@ -47,7 +58,7 @@ public class SwordPart : MonoBehaviour
     public void Attach(Node attachPoint, int myPoint, GameObject sword, Player player)
     {
         this.player = player;
-        this.parent = attachPoint.parent;
+        parent = attachPoint.parent;
 
         // Attach this sword part by making the node point at myPoint
         // equivelant to the attach point

@@ -37,6 +37,12 @@ public class Player : Character
     {
         get { return 10 * FInt.Max(new FInt(100.0f) - sword.weight, new FInt(10.0f)); }
     }
+    
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawSphere(new Vector3(position.x.ToFloat(), position.y.ToFloat()), PRADIUS.ToFloat());
+    }
 
     void Start()
     {

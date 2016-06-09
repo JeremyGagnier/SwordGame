@@ -400,9 +400,10 @@ public class World : MonoBehaviour
             }
         }
 
-        foreach (GameObject enemy in enemies)
+        for (int i = 0; i < enemies.Count; ++i)
         {
-            Enemy e = enemy.GetComponent<Enemy>();
+            int startlen = enemies.Count;
+            Enemy e = enemies[i].GetComponent<Enemy>();
             if (e.team != sourceTeam &&
                 e.invincibility.rawValue <= 0 &&
                 Collision.dist(source.x, source.y, e.position.x, e.position.y) <= e.radius + radius)
@@ -413,6 +414,12 @@ public class World : MonoBehaviour
                     callback();
                     callback = null;
                 }
+            }
+            // Check if the enemy died
+            // TODO: Improve this flow because this is a hack
+            if (enemies.Count != startlen)
+            {
+                i -= 1;
             }
         }
     }
