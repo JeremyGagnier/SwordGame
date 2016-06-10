@@ -31,7 +31,7 @@ public class SwordPart : MonoBehaviour
                 {
                     return _position;
                 }
-                return player.position;
+                return _position + player.position;
             }
             return _position + parent.position;
         }
@@ -76,7 +76,7 @@ public class SwordPart : MonoBehaviour
         position = new FVector(attachPoint.pos.x - transx, attachPoint.pos.y - transy);
 
         transform.localEulerAngles = new Vector3(0, 0, rotation.ToFloat() * 180.0f / Mathf.PI);
-        transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
+        transform.localPosition = new Vector3(_position.x.ToFloat(), _position.y.ToFloat());
 
         // TODO: Find depthInSword via recursive transformations
         // BREAKS: Proper sword construction

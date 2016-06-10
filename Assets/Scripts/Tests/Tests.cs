@@ -115,6 +115,19 @@ public class Tests : EditorWindow
             new FInt(1.4142),
             new FInt(0.01),
             "Test Square root for sqrt(2)");
+        RangeTest(
+            () => { return FInt.Sqrt(new FInt(16)); },
+            new FInt(4),
+            new FInt(0.01),
+            "Test Square root for 4");
+
+        System.Random r1 = new System.Random();
+        //System.Random r2 = new System.Random(0);
+        RangeTest(
+            () => { return FInt.RandomRange(r1, FInt.Zero(), FInt.One()); },
+            new FInt(0.5),
+            new FInt(0.5),
+            "Test Random Range to make sure the range is correct");
     }
 
     private void Test<T>(
@@ -138,7 +151,13 @@ public class Tests : EditorWindow
         }
         else if (debug)
         {
-            Debug.Log("Test #" + numTests.ToString() + " has passed. " + description);
+            Debug.Log(
+                "Test #" +
+                numTests.ToString() +
+                " has passed. Result: " +
+                result.ToString() +
+                " " +
+                description);
         }
     }
 
@@ -165,7 +184,13 @@ public class Tests : EditorWindow
         }
         else if (debug)
         {
-            Debug.Log("Test #" + numTests.ToString() + " has passed. " + description);
+            Debug.Log(
+                "Test #" +
+                numTests.ToString() +
+                " has passed. Result: " +
+                result.ToString() +
+                " " +
+                description);
         }
     }
 }

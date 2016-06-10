@@ -45,6 +45,11 @@ public struct FVector
         y = y / length;
         return this;
     }
+
+    public override string ToString()
+    {
+        return "FVector x: " + x.ToString() + ", y: " + y.ToString();
+    }
 }
 
 [System.Serializable]
@@ -322,9 +327,14 @@ public class FInt : ISerializationCallbackReceiver
     // Return random FInt within a range. Includes both end points.
     public static FInt RandomRange(System.Random seed, FInt min, FInt max)
     {
-        FInt r = FInt.RawFInt(seed.Next());
+        if (min.rawValue > max.rawValue)
+        {
+            Debug.LogError("Min must be less than max. Min: " + min.ToString() + ", Max: " + max.ToString());
+            return Zero();
+        }
+        FInt r = RawFInt(seed.Next());
         FInt diff = max - min;
-        return (r * diff) / FInt.RawFInt(4294967296) + min;
+        return (r * diff) / RawFInt(2147483648) + min;
     }
 
     public int ToInt()
