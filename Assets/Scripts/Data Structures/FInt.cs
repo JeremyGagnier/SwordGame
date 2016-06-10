@@ -170,6 +170,10 @@ public class FInt : ISerializationCallbackReceiver
     // Square root
     public static FInt Sqrt(FInt a)
     {
+        if (a.rawValue == 0)
+        {
+            return FInt.Zero();
+        }
         FInt x = FInt.One();
         for (int i = 0; i < 64; i++)
         {

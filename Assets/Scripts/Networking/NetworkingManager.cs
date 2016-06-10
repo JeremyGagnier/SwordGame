@@ -4,5 +4,5 @@ using System.Collections;
 
 public class NetworkingManager
 {
-    public static System.Random seed;
+    public static System.Random seed = null;
 }

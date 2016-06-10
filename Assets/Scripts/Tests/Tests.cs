@@ -110,6 +110,11 @@ public class Tests : EditorWindow
             new FInt(0.01),
             "Test Cos for -sqrt(2) / 2. This one is through 7 * pi / 4");
 
+        RangeTest(
+            () => { return FInt.Sqrt(new FInt(2)); },
+            new FInt(1.4142),
+            new FInt(0.01),
+            "Test Square root for sqrt(2)");
     }
 
     private void Test<T>(
