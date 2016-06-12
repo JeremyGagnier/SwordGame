@@ -8,6 +8,7 @@ public class Player : Character
     public static FInt PRADIUS = new FInt(100.0f); // How big players are
 
     public World world;
+    private InputManager input;
 
     public GameObject characterImg;
     public GameObject characterMask;
@@ -53,101 +54,39 @@ public class Player : Character
         }
     }
 
-    public void Setup(World world, FInt startx, FInt starty, int player, int team)
+    public void Setup(World world, InputManager input, FInt startx, FInt starty, int player, int team)
     {
         this.world = world;
-        this.team = team;
-        sword.world = world;
-        sword.owner = this;
+        this.input = input;
         position.x = startx;
         position.y = starty;
         pnum = player;
-        transform.position = new Vector3(posx, posy);
+        this.team = team;
+
+        sword.world = world;
+        sword.owner = this;
+
+        transform.position = new Vector3(startx.ToFloat(), starty.ToFloat());
     }
 
-    new void Update()
+    public override void Advance()
     {
-        FInt dx = FInt.Zero();
-        FInt dy = FInt.Zero();
-        if (pnum == 1)
+        FInt dx = input.xAxis;
+        FInt dy = -input.yAxis;
+        if (input.button1 && input.button1Changed)
         {
-            dx += InputManager.p1axisx;
-            dy -= InputManager.p1axisy;
-            if (InputManager.p1button1)
-            {
-                // Swing counter-clockwise
-                sword.Swing(Sword.SwingState.CCWISE, facing);
-            }
-            if (InputManager.p1button2)
-            {
-                // Stab
-                sword.Swing(Sword.SwingState.STAB, facing);
-            }
-            if (InputManager.p1button3)
-            {
-                // Swing clockwise
-                sword.Swing(Sword.SwingState.CWISE, facing);
-            }
+            // Swing counter-clockwise
+            sword.Swing(Sword.SwingState.CCWISE, facing);
         }
-        if (pnum == 2)
+        else if (input.button2 && input.button2Changed)
         {
-            dx += InputManager.p2axisx;
-            dy -= InputManager.p2axisy;
-            if (InputManager.p2button1)
-            {
-                // Swing counter-clockwise
-                sword.Swing(Sword.SwingState.CCWISE, facing);
-            }
-            if (InputManager.p2button2)
-            {
-                // Stab
-                sword.Swing(Sword.SwingState.STAB, facing);
-            }
-            if (InputManager.p2button3)
-            {
-                // Swing clockwise
-                sword.Swing(Sword.SwingState.CWISE, facing);
-            }
+            // Stab
+            sword.Swing(Sword.SwingState.STAB, facing);
         }
-        if (pnum == 3)
+        else if (input.button3 && input.button3Changed)
         {
-            dx += InputManager.p3axisx;
-            dy -= InputManager.p3axisy;
-            if (InputManager.p3button1)
-            {
-                // Swing counter-clockwise
-                sword.Swing(Sword.SwingState.CCWISE, facing);
-            }
-            if (InputManager.p3button2)
-            {
-                // Stab
-                sword.Swing(Sword.SwingState.STAB, facing);
-            }
-            if (InputManager.p3button3)
-            {
-                // Swing clockwise
-                sword.Swing(Sword.SwingState.CWISE, facing);
-            }
-        }
-        if (pnum == 3)
-        {
-            dx += InputManager.p4axisx;
-            dy -= InputManager.p4axisy;
-            if (InputManager.p4button1)
-            {
-                // Swing counter-clockwise
-                sword.Swing(Sword.SwingState.CCWISE, facing);
-            }
-            if (InputManager.p4button2)
-            {
-                // Stab
-                sword.Swing(Sword.SwingState.STAB, facing);
-            }
-            if (InputManager.p4button3)
-            {
-                // Swing clockwise
-                sword.Swing(Sword.SwingState.CWISE, facing);
-            }
+            // Swing clockwise
+            sword.Swing(Sword.SwingState.CWISE, facing);
         }
 
         if (dx.rawValue != 0 || dy.rawValue != 0)
@@ -194,7 +133,7 @@ public class Player : Character
             characterMask.transform.localScale = new Vector3(-1, 1, 1);
         }
 
-        base.Update();
+        base.Advance();
     }
 
     public void Damage(FVector source, FInt damage, FInt weight)

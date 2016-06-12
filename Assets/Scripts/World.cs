@@ -58,31 +58,30 @@ public class World : MonoBehaviour
     public GameObject p3Camera;
     public GameObject p4Camera;
 
-    public GameObject p1Object;
-    public GameObject p2Object;
-    public GameObject p3Object;
-    public GameObject p4Object;
-    public Player player1;
-    public Player player2;
-    public Player player3;
-    public Player player4;
-
     public int numPlayers;
     public int timeLeft;
     public Text timeText;
     public Text egt1;
     public Text egt2;
 
+    // TODO: Make swordParts private
     public List<GameObject> swordParts = new List<GameObject>();
-    public List<GameObject> enemies = new List<GameObject>();
+    private List<GameObject> enemies = new List<GameObject>();
+    [SerializeField] private List<GameObject> players = new List<GameObject>();
 
     void Start()
     {
         //GetComponent<AudioSource>().Play();
-        player1 = p1Object.GetComponent<Player>();
-        player2 = p2Object.GetComponent<Player>();
-        player3 = p3Object.GetComponent<Player>();
-        player4 = p4Object.GetComponent<Player>();
+    }
+
+    public void Advance()
+    {
+
+    }
+
+    public List<GameObject> GetPlayers()
+    {
+        return players;
     }
 
     public void StartGame(int numPlayers)
@@ -90,10 +89,8 @@ public class World : MonoBehaviour
         titleScreen.SetActive(false);
         this.numPlayers = numPlayers;
 
-        p1Object.SetActive(true);
-        player1.Setup(this, new FInt(-300), new FInt(0), 1, 1);
-        p2Object.SetActive(true);
-        player2.Setup(this, new FInt(300), new FInt(0), 2, 2);
+        players[0].SetActive(true);
+        players[1].SetActive(true);
         if (numPlayers == 2)
         {
             p1Camera1.SetActive(true);
@@ -112,25 +109,23 @@ public class World : MonoBehaviour
         if (numPlayers >= 3)
         {
             p3Camera.SetActive(true);
-            p3Object.SetActive(true);
-            player3.Setup(this, new FInt(0), new FInt(-300), 3, 3);
+            players[2].SetActive(true);
         }
         else
         {
             p3Camera.SetActive(false);
-            p3Object.SetActive(false);
+            players[2].SetActive(false);
         }
 
         if (numPlayers >= 4)
         {
             p4Camera.SetActive(true);
-            p4Object.SetActive(true);
-            player4.Setup(this, new FInt(0), new FInt(300), 4, 4);
+            players[3].SetActive(true);
         }
         else
         {
             p4Camera.SetActive(false);
-            p4Object.SetActive(false);
+            players[3].SetActive(false);
         }
 
         StartCoroutine(Timer());
@@ -255,73 +250,46 @@ public class World : MonoBehaviour
 
     public void EndGame()
     {
-        int winner_size = p1Object.GetComponent<Player>().sword.parts.Count;
-        int winner = 1;
-        if (p2Object.GetComponent<Player>().sword.parts.Count > winner_size)
+        int winnerSize = 0;
+        int winner = 0;
+        for (int i = 0; i < Game.numPlayers; ++i)
         {
-            winner_size = p2Object.GetComponent<Player>().sword.parts.Count;
-            winner = 2;
+            int pSwordSize = players[i].GetComponent<Player>().sword.parts.Count;
+            if (pSwordSize > winnerSize)
+            {
+                winner = i + 1;
+            }
         }
-        if (p3Object.GetComponent<Player>().sword.parts.Count > winner_size)
-        {
-            winner_size = p3Object.GetComponent<Player>().sword.parts.Count;
-            winner = 3;
-        }
-        if (p4Object.GetComponent<Player>().sword.parts.Count > winner_size)
-        {
-            winner_size = p4Object.GetComponent<Player>().sword.parts.Count;
-            winner = 4;
-        }
+
         egt1.enabled = true;
         egt1.text = "Player" + winner.ToString() + " Wins!!!";
         egt2.enabled = true;
-        egt2.text = "Their sword had " + (winner_size + 1).ToString() + " parts";
+        egt2.text = "Their sword had " + (winnerSize + 1).ToString() + " parts";
     }
 
-    public void Attack(int sourceTeam, FVector source, FInt radius, FVector knockbackSource, FInt damage, FInt weight, Action callback)
+    public void Attack(
+        int sourceTeam,
+        FVector source,
+        FInt radius,
+        FVector knockbackSource,
+        FInt damage,
+        FInt weight,
+        Action callback)
     {
-        if (player1.team != sourceTeam &&
-            player1.invincibility.rawValue <= 0 &&
-            Collision.dist(source.x, source.y, player1.position.x, player1.position.y) <= Player.PRADIUS + radius)
+        // TODO: Clean this up so that this simply checks against all Characters
+        for (int i = 0; i < players.Count; ++i)
         {
-            player1.Damage(knockbackSource, damage, weight);
-            if (callback != null)
+            Player p = players[i].GetComponent<Player>();
+            if (p.team != sourceTeam &&
+                p.invincibility.rawValue <= 0 &&
+                Collision.dist(source.x, source.y, p.position.x, p.position.y) <= Player.PRADIUS + radius)
             {
-                callback();
-                callback = null;
-            }
-        }
-        if (player2.team != sourceTeam &&
-            player2.invincibility.rawValue <= 0 &&
-            Collision.dist(source.x, source.y, player2.position.x, player2.position.y) <= Player.PRADIUS + radius)
-        {
-            player2.Damage(knockbackSource, damage, weight);
-            if (callback != null)
-            {
-                callback();
-                callback = null;
-            }
-        }
-        if (player3.team != sourceTeam &&
-            player3.invincibility.rawValue <= 0 &&
-            Collision.dist(source.x, source.y, player3.position.x, player3.position.y) <= Player.PRADIUS + radius)
-        {
-            player3.Damage(knockbackSource, damage, weight);
-            if (callback != null)
-            {
-                callback();
-                callback = null;
-            }
-        }
-        if (player4.team != sourceTeam &&
-            player4.invincibility.rawValue <= 0 &&
-            Collision.dist(source.x, source.y, player4.position.x, player4.position.y) <= Player.PRADIUS + radius)
-        {
-            player4.Damage(knockbackSource, damage, weight);
-            if (callback != null)
-            {
-                callback();
-                callback = null;
+                p.Damage(knockbackSource, damage, weight);
+                if (callback != null)
+                {
+                    callback();
+                    callback = null;
+                }
             }
         }
 

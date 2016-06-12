@@ -25,69 +25,11 @@ public class Enemy : Character
         team = 0;
     }
 
-    new void Update()
+    public override void Advance()
     {
-        // Chase after closest available player
-        FInt d1 = Collision.dist(position.x,
-                                 position.y,
-                                 world.player1.position.x,
-                                 world.player1.position.y);
-        FInt d2 = Collision.dist(position.x,
-                                 position.y,
-                                 world.player2.position.x,
-                                 world.player2.position.y);
-        FInt d3 = Collision.dist(position.x,
-                                 position.y,
-                                 world.player3.position.x,
-                                 world.player3.position.y);
-        FInt d4 = Collision.dist(position.x,
-                                 position.y,
-                                 world.player4.position.x,
-                                 world.player4.position.y);
-        FInt closest = d1;
-        int closest_pnum = 1;
-        if (d2 < closest)
-        {
-            closest = d2;
-            closest_pnum = 2;
-        }
-        if (d3 < closest && world.numPlayers >= 3)
-        {
-            closest = d3;
-            closest_pnum = 3;
-        }
-        if (d4 < closest && world.numPlayers >= 4)
-        {
-            closest = d4;
-            closest_pnum = 4;
-        }
-        FVector dir = new FVector();
-        switch (closest_pnum)
-        {
-            case 1:
-                dir = new FVector(world.player1.position.x - position.x,
-                                  world.player1.position.y - position.y);
-                dir.Normalize();
-                break;
+        // TODO: Implement enemy movement
+        FVector dir = new FVector(FInt.Zero(), FInt.Zero());
 
-            case 2:
-                dir = new FVector(world.player2.position.x - position.x,
-                                  world.player2.position.y - position.y);
-                dir.Normalize();
-                break;
-
-            case 3:
-                dir = new FVector(world.player3.position.x - position.x,
-                                  world.player3.position.y - position.y);
-                dir.Normalize();
-                break;
-
-            case 4:
-                dir = new FVector(world.player4.position.x - position.x,
-                                  world.player4.position.y - position.y);
-                dir.Normalize();
-                break;
-        }
         position.x += dir.x * speed * Game.TIMESTEP;
         position.y += dir.y * speed * Game.TIMESTEP;
 
@@ -120,7 +62,7 @@ public class Enemy : Character
             character.sprite = normalTex;
         }
 
-        base.Update();
+        base.Advance();
     }
 
     public void Damage(FVector source, FInt damage, FInt weight)
