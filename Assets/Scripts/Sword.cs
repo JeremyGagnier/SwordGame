@@ -45,10 +45,8 @@ public class Sword : MonoBehaviour
         weight = hilt.weight;
         damage = hilt.damage;
     }
-
-    // TODO: Call this from somewhere elses fixed update
-    // BREAKS: Multiplayer
-    void FixedUpdate()
+    
+    public void Advance()
     {
         if (swingDuration > Game.TIMESTEP)
         {

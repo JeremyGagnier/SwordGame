@@ -14,40 +14,8 @@ public class Collision
 
 public class World : MonoBehaviour
 {
-    // TODO: Automate this
-    public enum Part
-    {
-        CACTUS,
-        LEMON,
-        FLOWER,
-        BLADE,
-        BUCKET,
-        DOG,
-        LIGHTSABER,
-        LOBSTER,
-        LOG,
-        PANTS,
-        PENCIL,
-        ANCHOR,
-        UKELELE,
-        UKIWI
-    }
-    public GameObject cactusPrefab;
-    public GameObject lemonPrefab;
-    public GameObject flowerPrefab;
-    public GameObject bladePrefab;
-    public GameObject bucketPrefab;
-    public GameObject dogPrefab;
-    public GameObject lightsaberPrefab;
-    public GameObject lobsterPrefab;
-    public GameObject logPrefab;
-    public GameObject pantsPrefab;
-    public GameObject pencilPrefab;
-    public GameObject anchorPrefab;
-    public GameObject ukelelePrefab;
-    public GameObject ukiwiPrefab;
-    
     public List<GameObject> enemyPrefabs;
+    public List<GameObject> swordPartPrefabs;
 
     public GameObject titleScreen;
 
@@ -132,9 +100,9 @@ public class World : MonoBehaviour
     }
 
     // TODO: Automate this
-    public GameObject DropPart(FVector pos, Part part)
+    public GameObject DropPart(FVector pos)
     {
-        GameObject obj = Instantiate(logPrefab) as GameObject;
+        GameObject obj = Instantiate(swordPartPrefabs[0]) as GameObject;
         SwordPart objPart = obj.GetComponent<SwordPart>();
         objPart.position = pos;
         obj.transform.SetParent(this.transform);
@@ -161,39 +129,8 @@ public class World : MonoBehaviour
     // TODO: Automate this
     public void KillEnemy(GameObject enemy)
     {
-        Part dropPart = Part.CACTUS;
         Enemy e = enemy.GetComponent<Enemy>();
-        if (e.rarity == 1)
-        {
-            int pick = UnityEngine.Random.Range(0, 3);
-            if (pick == 0) dropPart = Part.BUCKET;
-            if (pick == 1) dropPart = Part.LOG;
-            if (pick == 2) dropPart = Part.FLOWER;
-            if (pick == 3) dropPart = Part.PENCIL;
-        }
-        else if (e.rarity == 2)
-        {
-            int pick = UnityEngine.Random.Range(0, 2);
-            if (pick == 0) dropPart = Part.CACTUS;
-            if (pick == 1) dropPart = Part.LEMON;
-            if (pick == 2) dropPart = Part.UKELELE;
-        }
-        else if (e.rarity == 3)
-        {
-            int pick = UnityEngine.Random.Range(0, 3);
-            if (pick == 0) dropPart = Part.ANCHOR;
-            if (pick == 1) dropPart = Part.BLADE;
-            if (pick == 2) dropPart = Part.LOBSTER;
-            if (pick == 3) dropPart = Part.PANTS;
-        }
-        else if (e.rarity == 4)
-        {
-            int pick = UnityEngine.Random.Range(0, 2);
-            if (pick == 0) dropPart = Part.DOG;
-            if (pick == 1) dropPart = Part.UKIWI;
-            if (pick == 2) dropPart = Part.LIGHTSABER;
-        }
-        DropPart(new FVector(e.position.x, e.position.y), dropPart);
+        DropPart(new FVector(e.position.x, e.position.y));
 
         enemies.Remove(enemy);
         DestroyObject(enemy);

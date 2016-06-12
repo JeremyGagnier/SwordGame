@@ -6,7 +6,8 @@ public class Game : MonoBehaviour
 {
     public static FInt TIMESTEP = new FInt(0.01666f);
 
-    public static int numPlayers;
+    public static int numPlayers = 2;
+    public static bool isPlaying = false;
 
     public World world;
 
@@ -31,11 +32,14 @@ public class Game : MonoBehaviour
             inputModules.Add(i);
             p.Setup(world, i, FInt.Zero(), FInt.Zero(), pnum, pnum);
         }
+
+        isPlaying = true;
     }
 
     void FixedUpdate()
     {
-        // TODO: Call everyone elses update functions here to fix multiplayer
+        if (!isPlaying) return;
+
         foreach (InputManager inputModule in inputModules)
         {
             inputModule.Advance();

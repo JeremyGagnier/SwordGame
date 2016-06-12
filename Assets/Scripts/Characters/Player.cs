@@ -133,6 +133,7 @@ public class Player : Character
             characterMask.transform.localScale = new Vector3(-1, 1, 1);
         }
 
+        sword.Advance();
         base.Advance();
     }
 
