@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 
 [System.Serializable]
@@ -21,25 +20,27 @@ public class Sword : MonoBehaviour
         STAB
     }
 
-    public World world;
-    public Player owner;
-    public SwordPart hilt;
-    public List<Node> freeNodes = new List<Node>();
-    public List<SwordPart> parts = new List<SwordPart>();
+    private Player owner;
+    private List<Node> freeNodes = new List<Node>();
+    private List<SwordPart> parts = new List<SwordPart>();
 
-    public FVector position;
-    public FInt rotation;
-    public FInt weight;
-    public FInt damage;
+    private FVector position;
+    private FInt rotation;
 
-    public SwingState state = SwingState.NONE;
-    public FInt swingDuration = FInt.Zero();
-    public FInt maxDuration = FInt.Zero();
-    public FInt swingCooldown = FInt.Zero();
-    public FInt angle = FInt.Zero();
+    private SwingState state = SwingState.NONE;
+    private FInt swingDuration = FInt.Zero();
+    private FInt maxDuration = FInt.Zero();
+    private FInt swingCooldown = FInt.Zero();
+    private FInt angle = FInt.Zero();
 
-    void Start()
+    [SerializeField] private SwordPart hilt;
+    
+    [HideInInspector] public FInt weight;
+    [HideInInspector] public FInt damage;
+
+    public void Setup(Player owner)
     {
+        this.owner = owner;
         hilt.player = owner;
         freeNodes.Add(hilt.nodePoints[0]);
         weight = hilt.weight;
@@ -55,8 +56,6 @@ public class Sword : MonoBehaviour
             FInt pct = swingDuration / maxDuration;
             switch (state)
             {
-                // TODO: Make the sword have FInt rotations and positions
-                // BREAKS: Sword position/movement
                 case SwingState.STAB:
                     position.x = 150 * (FInt.One() - pct) * FInt.Cos(angle + FInt.PI() / 2);
                     position.y = new FInt(61) + 150 * (FInt.One() - pct) * FInt.Sin(angle + FInt.PI() / 2);
@@ -116,10 +115,8 @@ public class Sword : MonoBehaviour
         }
     }
 
-    public void AddPart(GameObject part)
+    public void AddPart(SwordPart part)
     {
-        SwordPart swordPart = part.GetComponent<SwordPart>();
-
         Node n = freeNodes[0];
         FInt w = FInt.Zero();
         // First iteration counts the weight
@@ -147,19 +144,19 @@ public class Sword : MonoBehaviour
         }
 
         part.transform.SetParent(n.parent.transform);
-        int attachPoint = Random.Range(0, swordPart.nodePoints.Length);
-        swordPart.Attach(n, attachPoint, this.gameObject, owner);
+        int attachPoint = Random.Range(0, part.nodePoints.Length);
+        part.Attach(n, attachPoint, this.gameObject, owner);
         freeNodes.Remove(n);
-        swordPart.consumedNode = n;
-        for (int i = 0; i < swordPart.nodePoints.Length; ++i)
+        part.consumedNode = n;
+        for (int i = 0; i < part.nodePoints.Length; ++i)
         {
             if (i == attachPoint) continue;
-            freeNodes.Add(swordPart.nodePoints[i]);
+            freeNodes.Add(part.nodePoints[i]);
         }
 
-        parts.Add(swordPart);
-        weight += swordPart.weight;
-        damage += swordPart.damage;
+        parts.Add(part);
+        weight += part.weight;
+        damage += part.damage;
     }
 
     public void RemovePart()
@@ -168,47 +165,19 @@ public class Sword : MonoBehaviour
         {
             return;
         }
-
-        for (int i = 0; i < parts[parts.Count - 1].nodePoints.Length; ++i)
+        
+        SwordPart part = parts[parts.Count - 1];
+        for (int i = 0; i < part.nodePoints.Length; ++i)
         {
-            if (freeNodes.Contains(parts[parts.Count - 1].nodePoints[i]))
+            if (freeNodes.Contains(part.nodePoints[i]))
             {
-                freeNodes.Remove(parts[parts.Count - 1].nodePoints[i]);
+                freeNodes.Remove(part.nodePoints[i]);
             }
         }
-        freeNodes.Add(parts[parts.Count - 1].consumedNode);
-        weight -= parts[parts.Count - 1].weight;
-        damage -= parts[parts.Count - 1].damage;
-
-        GameObject part = parts[parts.Count - 1].gameObject;
+        freeNodes.Add(part.consumedNode);
+        weight -= part.weight;
+        damage -= part.damage;
         parts.RemoveAt(parts.Count - 1);
-
-        part.transform.SetParent(world.transform);
-        FInt randangle = FInt.RandomRange(NetworkingManager.seed, FInt.Zero(), new FInt(2.0f * 3.14159f));
-        FInt randdist = FInt.RandomRange(NetworkingManager.seed, new FInt(3.0f) * Player.PRADIUS, new FInt(6.0f) * Player.PRADIUS);
-        FVector position = new FVector(owner.position.x + randdist * FInt.Cos(randangle),
-                                       owner.position.y + randdist * FInt.Sin(randangle));
-
-        // Don't throw parts outside the game map
-        if (position.x.rawValue < -2880)
-        {
-            position.x.rawValue = -2880;
-        }
-        if (position.x.rawValue > 2880)
-        {
-            position.x.rawValue = 2880;
-        }
-        if (position.y.rawValue < -2160)
-        {
-            position.y.rawValue = -2160;
-        }
-        if (position.y.rawValue > 2160)
-        {
-            position.y.rawValue = 2160;
-        }
-
-        part.transform.position = new Vector3(position.x.ToFloat(), position.y.ToFloat());
-        world.swordParts.Add(part);
     }
 
     private void CheckCollisions()
@@ -216,7 +185,7 @@ public class Sword : MonoBehaviour
         parts.Add(hilt);
         foreach (SwordPart part in parts)
         {
-            part.Attack(world);
+            part.Attack();
         }
         parts.Remove(hilt);
     }

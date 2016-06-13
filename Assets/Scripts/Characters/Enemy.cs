@@ -1,28 +1,32 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 public class Enemy : Character
 {
-    public World world;
-    public int rarity;
-    public FInt speed;
-    public FInt health;
-    public FInt damage;
-    public FInt weight;
     public FInt radius;
 
+    [SerializeField] private FInt speed;
+    [SerializeField] private FInt health;
+    [SerializeField] private FInt damage;
+    [SerializeField] private FInt weight;
+
+    [SerializeField] private Sprite normalTex;
+    [SerializeField] private Sprite hitTex;
+    [SerializeField] private Sprite attackTex;
+    [SerializeField] private Image character;
+    
     private FInt rehitTimer = FInt.Zero();
     private FInt damagedTimer = FInt.Zero();
-
-    public Sprite normalTex;
-    public Sprite hitTex;
-    public Sprite attackTex;
-    public Image character;
-
+    
     void Awake()
     {
         team = 0;
+    }
+
+    public void Setup(FVector pos)
+    {
+        position = new FVector(pos);
+        transform.position = new Vector3(pos.x.ToFloat(), pos.y.ToFloat());
     }
 
     public override void Advance()
@@ -42,7 +46,7 @@ public class Enemy : Character
             transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
         }
 
-        world.Attack(team, position, radius, position, damage, weight, () => { rehitTimer = new FInt(1.0f); });
+        Game.instance.Attack(team, position, radius, damage, () => { rehitTimer = new FInt(1.0f); });
         if (rehitTimer.rawValue > 0)
         {
             rehitTimer -= Game.TIMESTEP;
@@ -65,22 +69,13 @@ public class Enemy : Character
         base.Advance();
     }
 
-    public void Damage(FVector source, FInt damage, FInt weight)
+    public void Damage(FInt damage)
     {
-        // Apply knockback
-        FInt dx = position.x - source.x;
-        FInt dy = position.y - source.y;
-        FInt a = FInt.Atan(dx, dy);
-
-        // TODO: Smarter knockback calculation
-        position = new FVector(position.x + new FInt(7) * weight * FInt.Cos(a),
-                               position.y + new FInt(7) * weight * FInt.Sin(a));
-
         // Die if life reaches zero
         health -= damage;
         if (health.rawValue <= 0)
         {
-            world.KillEnemy(gameObject);
+            Game.instance.KillEnemy(this);
             return;
         }
         damagedTimer = new FInt(0.25f);

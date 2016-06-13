@@ -1,22 +1,18 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 public class SwordPart : MonoBehaviour
 {
-    public int rarity;
-    // TODO: Make parent and player set properly
-    // BREAKS: Sword part functionality
-    public SwordPart parent;
+    private SwordPart parent;
+    private FInt rotation;
+    
+    [HideInInspector] public FInt depthInSword = FInt.Zero();
+    [HideInInspector] public Node consumedNode;
+
     public Player player;
-    public FInt rotation;
-    public FInt weight;
     public FInt damage;
-    // TODO: Add radius property and fix sword part prefabs
-    // BREAKS: Sword collisions
+    public FInt weight;
     public FInt radius;
     public Node[] nodePoints;
-    public FInt depthInSword = FInt.Zero();
-    public Node consumedNode;
 
     private FVector _position;
     public FVector position
@@ -43,7 +39,7 @@ public class SwordPart : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.blue;
+        Gizmos.color = new Color(0f, 0f, 1f, 0.5f);
         Gizmos.DrawSphere(new Vector3(position.x.ToFloat(), position.y.ToFloat()), radius.ToFloat());
     }
 
@@ -53,6 +49,11 @@ public class SwordPart : MonoBehaviour
         {
             nodePoints[i].parent = this;
         }
+    }
+
+    public void Setup(FVector pos)
+    {
+        position = pos;
     }
 
     public void Attach(Node attachPoint, int myPoint, GameObject sword, Player player)
@@ -89,8 +90,8 @@ public class SwordPart : MonoBehaviour
          */
     }
 
-    public void Attack(World world)
+    public void Attack()
     {
-        world.Attack(player.team, position, radius, player.position, damage, FInt.Zero(), null);
+        Game.instance.Attack(player.team, position, radius, FInt.Zero(), null);
     }
 }

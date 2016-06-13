@@ -3,9 +3,9 @@ using System.Collections;
 
 public class Character : MonoBehaviour
 {
-    public FVector position = new FVector(FInt.Zero(), FInt.Zero());
-    public int team;
-    public FInt invincibility = FInt.Zero();
+    [HideInInspector] public FVector position = new FVector(FInt.Zero(), FInt.Zero());
+    [HideInInspector] public int team;
+    [HideInInspector] public FInt invincibility = FInt.Zero();
 
     public virtual void Advance()
     {

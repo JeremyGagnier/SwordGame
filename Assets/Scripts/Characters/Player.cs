@@ -1,20 +1,14 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 
 public class Player : Character
 {
-    public static FInt PRADIUS = new FInt(100.0f); // How big players are
-
-    public World world;
+    public static FInt PRADIUS = new FInt(100.0f);
+    
     private InputManager input;
-
-    public GameObject characterImg;
-    public GameObject characterMask;
-
+    private FInt dmgLeftovers = FInt.Zero();
     private List<FVector> lastFacing;
-    public FInt facing {
+    private FInt facing {
         get
         {
             FInt dx = FInt.Zero();
@@ -30,15 +24,11 @@ public class Player : Character
         }
     }
 
-    public int pnum;
     public Sword sword;
-    private FInt dmgLeftovers = FInt.Zero();
 
-    public FInt speed
-    {
-        get { return 10 * FInt.Max(new FInt(100.0f) - sword.weight, new FInt(10.0f)); }
-    }
-    
+    [SerializeField] private GameObject characterImg;
+    [SerializeField] private GameObject characterMask;
+
     void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -54,19 +44,16 @@ public class Player : Character
         }
     }
 
-    public void Setup(World world, InputManager input, FInt startx, FInt starty, int player, int team)
+    public void Setup(InputManager input, FInt startx, FInt starty, int team)
     {
-        this.world = world;
         this.input = input;
         position.x = startx;
         position.y = starty;
-        pnum = player;
         this.team = team;
 
-        sword.world = world;
-        sword.owner = this;
-
         transform.position = new Vector3(startx.ToFloat(), starty.ToFloat());
+
+        sword.Setup(this);
     }
 
     public override void Advance()
@@ -91,26 +78,10 @@ public class Player : Character
 
         if (dx.rawValue != 0 || dy.rawValue != 0)
         {
-            position.x += dx * speed * Game.TIMESTEP;
-            position.y += dy * speed * Game.TIMESTEP;
+            position.x += dx * CalculateSpeed() * Game.TIMESTEP;
+            position.y += dy * CalculateSpeed() * Game.TIMESTEP;
             lastFacing.RemoveAt(0);
             lastFacing.Add(new FVector(dx, dy));
-        }
-
-        // Check for collisions with items to add them to sword
-        for (int i = 0; i < world.swordParts.Count; ++i)
-        {
-            GameObject part = world.swordParts[i];
-            SwordPart p = part.GetComponent<SwordPart>();
-            if (Collision.dist(p.position.x,
-                               p.position.y,
-                               position.x,
-                               position.y) < PRADIUS)
-            {
-                sword.AddPart(part);
-                world.swordParts.RemoveAt(i);
-                i -= 1;
-            }
         }
 
         FInt fdx = FInt.Zero();
@@ -120,6 +91,8 @@ public class Player : Character
             fdx += vec.x;
             fdy += vec.y;
         }
+
+        // TODO: Clean up this hack with animations
         if (fdx.rawValue < 0)
         {
             characterImg.transform.localPosition = new Vector3(30, 118, 0);
@@ -137,15 +110,8 @@ public class Player : Character
         base.Advance();
     }
 
-    public void Damage(FVector source, FInt damage, FInt weight)
+    public void Damage(FInt damage)
     {
-        // Apply knockback
-        FInt dx = position.x - source.x;
-        FInt dy = position.y - source.y;
-        FInt a = FInt.Atan(dx, dy);
-        position.x += new FInt(7.0f) * weight * FInt.Cos(a);
-        position.y += new FInt(7.0f) * weight * FInt.Sin(a);
-
         // Remove sword parts
         dmgLeftovers += damage;
         while (dmgLeftovers >= FInt.One())
@@ -154,5 +120,10 @@ public class Player : Character
             sword.RemovePart();
         }
         invincibility += new FInt(0.4f);
+    }
+
+    public FInt CalculateSpeed()
+    {
+        return 10 * FInt.Max(new FInt(100.0f) - sword.weight, new FInt(10.0f));
     }
 }
