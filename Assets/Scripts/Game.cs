@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 public class Game : MonoBehaviour
@@ -81,10 +80,11 @@ public class Game : MonoBehaviour
             for (int i = 0; i < swordParts.Count; ++i)
             {
                 SwordPart part = swordParts[i];
-                if (Collision.Distance(part.position.x,
-                                   part.position.y,
-                                   player.position.x,
-                                   player.position.y) < Player.PRADIUS)
+                if (Collision.CircleToCircle(
+                        part.position,
+                        player.position,
+                        FInt.Zero(),
+                        player.radius))
                 {
                     player.sword.AddPart(part);
                     swordParts.RemoveAt(i);
@@ -112,46 +112,33 @@ public class Game : MonoBehaviour
         int sourceTeam,
         FVector source,
         FInt radius,
-        FInt damage,
-        Action callback)
+        FInt damage)
     {
-        // TODO: Clean this up so that this simply checks against all Characters
-        for (int i = 0; i < players.Count; ++i)
+        // Generate a list of characters to do a generic hit test
+        Character[] characters = new Character[players.Count + enemies.Count];
+        int i = 0;
+        foreach (Player player in players)
         {
-            Player p = players[i].GetComponent<Player>();
-            if (p.team != sourceTeam &&
-                p.invincibility.rawValue <= 0 &&
-                Collision.Distance(source.x, source.y, p.position.x, p.position.y) <= Player.PRADIUS + radius)
-            {
-                p.Damage(damage);
-                if (callback != null)
-                {
-                    callback();
-                    callback = null;
-                }
-            }
+            characters[i] = player;
+            ++i;
         }
-
-        for (int i = 0; i < enemies.Count; ++i)
+        foreach (Enemy enemy in enemies)
         {
-            int startlen = enemies.Count;
-            Enemy e = enemies[i].GetComponent<Enemy>();
-            if (e.team != sourceTeam &&
-                e.invincibility.rawValue <= 0 &&
-                Collision.Distance(source.x, source.y, e.position.x, e.position.y) <= e.radius + radius)
+            characters[i] = enemy;
+            ++i;
+        }
+        for (i = 0; i < players.Count + enemies.Count; ++i)
+        {
+            Character character = characters[i];
+            if (character.team != sourceTeam &&
+                character.invincibility.rawValue <= 0 &&
+                Collision.CircleToCircle(
+                    source,
+                    character.position,
+                    radius,
+                    character.radius))
             {
-                e.Damage(damage);
-                if (callback != null)
-                {
-                    callback();
-                    callback = null;
-                }
-            }
-            // Check if the enemy died
-            // TODO: Improve this flow because this is a hack
-            if (enemies.Count != startlen)
-            {
-                i -= 1;
+                character.Damage(damage);
             }
         }
     }

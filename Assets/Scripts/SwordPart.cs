@@ -92,6 +92,6 @@ public class SwordPart : MonoBehaviour
 
     public void Attack()
     {
-        Game.instance.Attack(player.team, position, radius, FInt.Zero(), null);
+        Game.instance.Attack(player.team, position, radius, damage);
     }
 }

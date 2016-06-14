@@ -29,10 +29,9 @@ public class Player : Character
     [SerializeField] private GameObject characterImg;
     [SerializeField] private GameObject characterMask;
 
-    void OnDrawGizmos()
+    void Awake()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(new Vector3(position.x.ToFloat(), position.y.ToFloat()), PRADIUS.ToFloat());
+        radius = PRADIUS;
     }
 
     void Start()
@@ -110,7 +109,7 @@ public class Player : Character
         base.Advance();
     }
 
-    public void Damage(FInt damage)
+    public override void Damage(FInt damage)
     {
         // Remove sword parts
         dmgLeftovers += damage;

@@ -45,6 +45,16 @@ public struct FVector
         return this;
     }
 
+    public FVector Rotate(FInt angle)
+    {
+        FInt oldAngle = FInt.Atan(x, y);
+        FInt newAngle = oldAngle + angle;
+        FInt length = FInt.Sqrt(x * x + y * y);
+        x = FInt.Cos(newAngle) * length;
+        y = FInt.Sin(newAngle) * length;
+        return this;
+    }
+
     public override string ToString()
     {
         return "FVector x: " + x.ToString() + ", y: " + y.ToString();
