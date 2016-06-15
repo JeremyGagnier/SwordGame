@@ -3,22 +3,63 @@ using System.Collections;
 
 public class Blob : Enemy
 {
+    [SerializeField] private FInt speed;
+    [SerializeField] private FInt jumpCooldown;
+    [SerializeField] private FInt jumpDuration;
+
+    private enum State
+    {
+        WAITING,
+        JUMPING
+    }
+    private State state;
+    private FVector jumpDirection;
+    private FInt cooldown;
+    private FInt timeJumping = FInt.Zero();
+
+    void Start()
+    {
+        state = State.WAITING;
+        cooldown = new FInt(jumpCooldown);
+    }
+
     public override void Advance()
     {
-        FVector dir = new FVector(FInt.Zero(), FInt.Zero());
-
-        //position.x += dir.x * speed * Game.TIMESTEP;
-        //position.y += dir.y * speed * Game.TIMESTEP;
-
-        if (dir.x.rawValue < 0)
+        if (state == State.WAITING)
         {
-            transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+            cooldown -= Game.TIMESTEP;
+            if (cooldown.rawValue <= 0)
+            {
+                cooldown = new FInt(jumpCooldown);
+                jumpDirection = Game.instance.GetNearestPlayerPosition(position);
+                jumpDirection.x = (jumpDirection.x - position.x);
+                jumpDirection.y = (jumpDirection.y - position.y);
+                jumpDirection = jumpDirection.Normalize();
+                if (jumpDirection.x.rawValue < 0)
+                {
+                    transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+                }
+                else
+                {
+                    transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+                }
+                state = State.JUMPING;
+            }
         }
-        else
+        else if (state == State.JUMPING)
         {
-            transform.localScale = new Vector3(-1.0f, 1.0f, 1.0f);
+            timeJumping += Game.TIMESTEP;
+            if (timeJumping >= jumpDuration)
+            {
+                timeJumping = FInt.Zero();
+                state = State.WAITING;
+            }
+            else
+            {
+                position.x += jumpDirection.x * speed * Game.TIMESTEP;
+                position.y += jumpDirection.y * speed * Game.TIMESTEP;
+            }
         }
-
         base.Advance();
     }
 }

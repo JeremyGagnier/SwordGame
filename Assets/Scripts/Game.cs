@@ -161,4 +161,20 @@ public class Game : MonoBehaviour
         }
         return false;
     }
+
+    public FVector GetNearestPlayerPosition(FVector position)
+    {
+        FVector pos = new FVector(players[0].position);
+        FInt dist = Collision.Distance(pos.x, pos.y, position.x, position.y);
+        foreach (Player player in players)
+        {
+            FInt newDist = Collision.Distance(player.position.x, player.position.y, position.x, position.y);
+            if (dist > newDist)
+            {
+                dist = newDist;
+                pos = new FVector(player.position);
+            }
+        }
+        return pos;
+    }
 }
