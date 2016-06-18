@@ -14,6 +14,7 @@ public class SwordPart : MonoBehaviour
     public FInt radius;
     public Node[] nodePoints;
 
+    // TODO: Fix recursive sword part position calculations. They should be rotated by the swords rotation.
     private FVector _position;
     public FVector position
     {

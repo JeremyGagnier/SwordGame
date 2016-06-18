@@ -14,23 +14,22 @@ public class Blob : Enemy
     }
     private State state;
     private FVector jumpDirection;
-    private FInt cooldown;
+    private FInt cooldown = FInt.Zero();
     private FInt timeJumping = FInt.Zero();
 
     void Start()
     {
         state = State.WAITING;
-        cooldown = new FInt(jumpCooldown);
     }
 
     public override void Advance()
     {
         if (state == State.WAITING)
         {
-            cooldown -= Game.TIMESTEP;
-            if (cooldown.rawValue <= 0)
+            cooldown += Game.TIMESTEP;
+            if (cooldown >= jumpCooldown)
             {
-                cooldown = new FInt(jumpCooldown);
+                cooldown = FInt.Zero();
                 jumpDirection = Game.instance.GetNearestPlayerPosition(position);
                 jumpDirection.x = (jumpDirection.x - position.x);
                 jumpDirection.y = (jumpDirection.y - position.y);

@@ -19,6 +19,7 @@ public class Character : MonoBehaviour
         {
             invincibility -= Game.TIMESTEP;
         }
+        position = Game.instance.GetWrappedPosition(position);
         transform.position = new Vector3(position.x.ToFloat(), position.y.ToFloat());
     }
 

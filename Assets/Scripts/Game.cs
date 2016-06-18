@@ -94,6 +94,11 @@ public class Game : MonoBehaviour
         }
     }
 
+    public FVector GetWrappedPosition(FVector pos)
+    {
+        return world.GetWrappedPosition(pos);
+    }
+
     public void SummonEnemy(GameObject enemyObject, FVector pos)
     {
         Enemy enemy = world.SummonEnemy(enemyObject, pos);

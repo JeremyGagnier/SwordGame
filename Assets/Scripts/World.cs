@@ -3,16 +3,35 @@ using System.Collections.Generic;
 
 public class World : MonoBehaviour
 {
-    public GameObject p1Camera1;
-    public GameObject p2Camera1;
-    public GameObject p1Camera2;
-    public GameObject p2Camera2;
-    public GameObject p3Camera;
-    public GameObject p4Camera;
+    [SerializeField] private FInt width;
+    [SerializeField] private FInt height;
+    [SerializeField] private GameObject p1Camera1;
+    [SerializeField] private GameObject p2Camera1;
+    [SerializeField] private GameObject p1Camera2;
+    [SerializeField] private GameObject p2Camera2;
+    [SerializeField] private GameObject p3Camera;
+    [SerializeField] private GameObject p4Camera;
 
     [SerializeField] private List<GameObject> enemyPrefabs;
     [SerializeField] private List<GameObject> swordPartPrefabs;
     [SerializeField] private List<GameObject> players;
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = new Color(0f, 1f, 0f, 1f);
+        Gizmos.DrawLine(
+            new Vector3(-width.ToFloat() / 2, -height.ToFloat() / 2),
+            new Vector3(width.ToFloat() / 2, -height.ToFloat() / 2));
+        Gizmos.DrawLine(
+            new Vector3(-width.ToFloat() / 2, -height.ToFloat() / 2),
+            new Vector3(-width.ToFloat() / 2, height.ToFloat() / 2));
+        Gizmos.DrawLine(
+            new Vector3(width.ToFloat() / 2, height.ToFloat() / 2),
+            new Vector3(width.ToFloat() / 2, -height.ToFloat() / 2));
+        Gizmos.DrawLine(
+            new Vector3(width.ToFloat() / 2, height.ToFloat() / 2),
+            new Vector3(-width.ToFloat() / 2, height.ToFloat() / 2));
+    }
 
     void Start()
     {
@@ -92,5 +111,36 @@ public class World : MonoBehaviour
     public void KillEnemy(GameObject enemy)
     {
         DestroyObject(enemy);
+    }
+
+    public FVector GetWrappedPosition(FVector pos)
+    {
+        FInt px;
+        if (pos.x < -width / 2)
+        {
+            px = pos.x + width;
+        }
+        else if (pos.x > width / 2)
+        {
+            px = pos.x - width;
+        }
+        else
+        {
+            px = new FInt(pos.x);
+        }
+        FInt py;
+        if (pos.y < -height / 2)
+        {
+            py = pos.y + height;
+        }
+        else if (pos.y > height / 2)
+        {
+            py = pos.y - height;
+        }
+        else
+        {
+            py = new FInt(pos.y);
+        }
+        return new FVector(px, py);
     }
 }
