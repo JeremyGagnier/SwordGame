@@ -5,9 +5,7 @@ public class World : MonoBehaviour
 {
     [SerializeField] private FInt width;
     [SerializeField] private FInt height;
-    [SerializeField] private GameObject p1Camera1;
     [SerializeField] private GameObject p2Camera1;
-    [SerializeField] private GameObject p1Camera2;
     [SerializeField] private GameObject p2Camera2;
     [SerializeField] private GameObject p3Camera;
     [SerializeField] private GameObject p4Camera;
@@ -52,44 +50,93 @@ public class World : MonoBehaviour
     {
         players[0].SetActive(true);
         players[1].SetActive(true);
-        if (Game.numPlayers == 2)
+        for (int p = 0; p < 4; ++p)
         {
-            p1Camera1.SetActive(true);
-            p2Camera1.SetActive(true);
-            p1Camera2.SetActive(false);
-            p2Camera2.SetActive(false);
-        }
-        else
-        {
-            p1Camera1.SetActive(false);
-            p2Camera1.SetActive(false);
-            p1Camera2.SetActive(true);
-            p2Camera2.SetActive(true);
+            for (int x = 0; x < 3; ++x)
+            {
+                for (int y = 0; y < 3; ++y)
+                {
+                    if (x == 1 && y == 1) continue;
+                    AttachCameraToPlayer(
+                        p + 1,
+                        (Game.numPlayers == 2) ? 2 : 4,
+                        new Vector3(
+                            width.ToFloat() * (x - 1),
+                            height.ToFloat() * (y - 1) + 118f,
+                            -10f));
+                }
+            }
+            // Add the main camera last so that unity renders it last.
+            AttachCameraToPlayer(
+                p + 1,
+                (Game.numPlayers == 2) ? 2 : 4,
+                new Vector3(0f, 118f, -10f));
         }
 
         if (Game.numPlayers >= 3)
         {
-            p3Camera.SetActive(true);
             players[2].SetActive(true);
         }
         else
         {
-            p3Camera.SetActive(false);
             players[2].SetActive(false);
         }
 
         if (Game.numPlayers >= 4)
         {
-            p4Camera.SetActive(true);
             players[3].SetActive(true);
         }
         else
         {
-            p4Camera.SetActive(false);
             players[3].SetActive(false);
         }
     }
     
+    private void AttachCameraToPlayer(int player, int numScreens, Vector3 position)
+    {
+        GameObject cameraObj = new GameObject("Camera");
+        Camera camera = cameraObj.AddComponent<Camera>();
+        cameraObj.transform.parent = players[player - 1].transform;
+        cameraObj.transform.localPosition = position;
+
+        camera.clearFlags = CameraClearFlags.Nothing;
+        camera.renderingPath = RenderingPath.Forward;
+        camera.orthographic = true;
+        switch (numScreens)
+        {
+            case 2:
+                camera.orthographicSize = 800;
+                switch (player)
+                {
+                    case 1:
+                        camera.rect = new Rect(0, 0, 0.5f, 1);
+                        break;
+                    case 2:
+                        camera.rect = new Rect(0.5f, 0, 0.5f, 1);
+                        break;
+                }
+                break;
+            case 4:
+                camera.orthographicSize = 500;
+                switch (player)
+                {
+                    case 1:
+                        camera.rect = new Rect(0, 0.5f, 0.5f, 0.5f);
+                        break;
+                    case 2:
+                        camera.rect = new Rect(0.5f, 0.5f, 0.5f, 0.5f);
+                        break;
+                    case 3:
+                        camera.rect = new Rect(0, 0, 0.5f, 0.5f);
+                        break;
+                    case 4:
+                        camera.rect = new Rect(0.5f, 0, 0.5f, 0.5f);
+                        break;
+                }
+                break;
+        }
+    }
+
     public SwordPart DropPart(GameObject swordPartObject, FVector pos)
     {
         GameObject obj = Instantiate(swordPartPrefabs[0]) as GameObject;

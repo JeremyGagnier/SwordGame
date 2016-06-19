@@ -40,6 +40,10 @@ public struct FVector
     public FVector Normalize()
     {
         FInt length = FInt.Sqrt(x * x + y * y);
+        if (length.rawValue == 0)
+        {
+            return this;
+        }
         x = x / length;
         y = y / length;
         return this;

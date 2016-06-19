@@ -57,8 +57,8 @@ public class Player : Character
 
     public override void Advance()
     {
-        FInt dx = input.xAxis;
-        FInt dy = -input.yAxis;
+        FVector dpos = new FVector(input.xAxis, -input.yAxis);
+        dpos = dpos.Normalize();
         if (input.button1 && input.button1Changed)
         {
             // Swing counter-clockwise
@@ -75,12 +75,12 @@ public class Player : Character
             sword.Swing(Sword.SwingState.CWISE, facing);
         }
 
-        if (dx.rawValue != 0 || dy.rawValue != 0)
+        if (dpos.x.rawValue != 0 || dpos.y.rawValue != 0)
         {
-            position.x += dx * CalculateSpeed() * Game.TIMESTEP;
-            position.y += dy * CalculateSpeed() * Game.TIMESTEP;
+            position.x += dpos.x * CalculateSpeed() * Game.TIMESTEP;
+            position.y += dpos.y * CalculateSpeed() * Game.TIMESTEP;
             lastFacing.RemoveAt(0);
-            lastFacing.Add(new FVector(dx, dy));
+            lastFacing.Add(dpos);
         }
 
         FInt fdx = FInt.Zero();
