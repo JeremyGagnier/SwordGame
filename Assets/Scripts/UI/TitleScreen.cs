@@ -20,5 +20,6 @@ public class TitleScreen : Panel
     private void Online()
     {
         // TODO: Add online panel
+        NetworkingManager.StartNetworking();
     }
 }
