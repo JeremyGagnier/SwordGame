@@ -1,0 +1,3 @@
+[submodule "Assets/Submodules/SocketHandler"]
+	path = Assets/Submodules/SocketHandler
+	url = https://github.com/d00mlord/SocketHandler
