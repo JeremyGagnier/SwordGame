@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Net;
-using System.Collections;
+using System.Net.Sockets;
 
 public class NetworkingManager
 {
@@ -15,9 +15,26 @@ public class NetworkingManager
     public static void StartNetworking()
     {
         clientSocket = new SocketHandler.Client(Dns.GetHostAddresses(DNS_NAME)[0], PORT);
+        /*
+        IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
+        IPAddress ipAddress = null;
+        foreach (IPAddress addr in ipHostInfo.AddressList)
+        {
+            if (addr.AddressFamily == AddressFamily.InterNetwork)
+            {
+                ipAddress = addr;
+                break;
+            }
+        }
+        clientSocket = new SocketHandler.Client(ipAddress, PORT);
+        */
         if (!clientSocket.isRunning)
         {
             Debug.LogError("Failed to connect to server");
+        }
+        else
+        {
+            Debug.LogError("Successfully connected to server");
         }
     }
 
