@@ -18,6 +18,11 @@ public class Game : MonoBehaviour
     private List<SwordPart> swordParts = new List<SwordPart>();
     private List<Spawner> spawners = new List<Spawner>();
 
+    ~Game()
+    {
+        NetworkingManager.StopNetworking();
+    }
+
     void Awake()
     {
         instance = this;

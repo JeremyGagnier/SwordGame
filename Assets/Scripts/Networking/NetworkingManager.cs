@@ -9,13 +9,16 @@ public class NetworkingManager
     private const int PORT = 5287;
 
     public static System.Random seed = null;
-        
+
+    private static string username = "Guest";
     private static SocketHandler.Client clientSocket;
 
-    public static void StartNetworking()
+    public static bool StartNetworking()
     {
-        clientSocket = new SocketHandler.Client(Dns.GetHostAddresses(DNS_NAME)[0], PORT);
-        /*
+        //clientSocket = new SocketHandler.Client(Dns.GetHostAddresses(DNS_NAME)[0], PORT);
+        
+        // This section finds the local IP address.
+        // This is only used when the server is on the same computer.
         IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
         IPAddress ipAddress = null;
         foreach (IPAddress addr in ipHostInfo.AddressList)
@@ -27,19 +30,39 @@ public class NetworkingManager
             }
         }
         clientSocket = new SocketHandler.Client(ipAddress, PORT);
-        */
+        
         if (!clientSocket.isRunning)
         {
             Debug.LogError("Failed to connect to server");
+            clientSocket = null;
+            return false;
         }
-        else
+
+        // Set up the connection. First say hello!
+        clientSocket.SendData("queue " + username);
+
+        return true;
+    }
+
+    public static void StopNetworking()
+    {
+        if (clientSocket != null)
         {
-            Debug.LogError("Successfully connected to server");
+            if (clientSocket.isRunning)
+            {
+                clientSocket.Stop();
+            }
+            clientSocket = null;
         }
     }
 
     public static void WaitForInput()
     {
         throw new NotImplementedException();
+    }
+
+    public static void SetUsername(string name)
+    {
+        username = name;
     }
 }
