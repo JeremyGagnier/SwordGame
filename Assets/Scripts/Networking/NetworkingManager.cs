@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
@@ -12,6 +13,14 @@ public class NetworkingManager
 
     private static string username = "Guest";
     private static SocketHandler.Client clientSocket;
+    private static Dictionary<string, Action<string[]>> routes =
+        new Dictionary<string, Action<string[]>>()
+    {
+        { "ng", NewGame },
+        { "g", GetGameMessage },
+    };
+
+    private static List<int> playerFrames = new List<int>();
 
     public static bool StartNetworking()
     {
@@ -37,9 +46,7 @@ public class NetworkingManager
             clientSocket = null;
             return false;
         }
-
-        // Set up the connection. First say hello!
-        clientSocket.SendData("queue " + username);
+        clientSocket.onReceiveData += ProcessMessage;
 
         return true;
     }
@@ -56,13 +63,56 @@ public class NetworkingManager
         }
     }
 
-    public static void WaitForInput()
-    {
-        throw new NotImplementedException();
-    }
-
     public static void SetUsername(string name)
     {
         username = name;
+        if (clientSocket != null)
+        {
+            clientSocket.SendData("name " + name);
+        }
+    }
+
+    public static void StartSearching(List<int> gameModes)
+    {
+        string[] modeStrings = new string[gameModes.Count];
+        for (int i = 0; i < gameModes.Count; ++i)
+        {
+            modeStrings[i] = gameModes[i].ToString();
+        }
+        clientSocket.SendData("queue " + string.Join(",", modeStrings));
+    }
+
+    public static void SendGameMessage(string inputs)
+    {
+        clientSocket.SendData("g " + inputs);
+    }
+
+    private static void ProcessMessage(string message)
+    {
+        string[] args = message.Split(' ');
+        routes[args[0]](args);
+    }
+
+    private static void NewGame(string[] args)
+    {
+        OnlineGame gameInfo = new OnlineGame();
+        int numPlayers = Convert.ToInt32(args[1]);
+        gameInfo.myPlayerNum = Convert.ToInt32(args[2]);
+        gameInfo.playerNames = new List<string>();
+        for (int i = 0; i < numPlayers; ++i)
+        {
+            gameInfo.playerNames.Add(args[i + 3]);
+        }
+        Game.instance.StartGame(numPlayers, gameInfo);
+    }
+
+    private static void GetGameMessage(string[] args)
+    {
+        string inputs = args[2];
+        for (int i = 3; i < args.Length; ++i)
+        {
+            inputs += " " + args[i];
+        }
+        Game.instance.GameMessage(Convert.ToInt32(args[1]), inputs);
     }
 }

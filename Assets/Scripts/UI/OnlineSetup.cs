@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class OnlineSetup : Panel
 {
@@ -9,5 +10,10 @@ public class OnlineSetup : Panel
     public void SetUsername()
     {
         NetworkingManager.SetUsername(nameField.text);
+    }
+
+    public void Ready()
+    {
+        NetworkingManager.StartSearching(new List<int>() { 2 });
     }
 }

@@ -9,14 +9,15 @@ public class SplitScreenSetup : Panel
     
     void Start()
     {
-        twoPlayers.onClick.AddListener(StartGame);
-        threePlayers.onClick.AddListener(StartGame);
-        fourPlayers.onClick.AddListener(StartGame);
+        twoPlayers.onClick.AddListener(() => { StartGame(2); });
+        threePlayers.onClick.AddListener(() => { StartGame(3); });
+        fourPlayers.onClick.AddListener(() => { StartGame(4); });
     }
 
-    private void StartGame()
+    private void StartGame(int numPlayers)
     {
         UIManager.instance.ClosePanel("Split Screen Setup");
         UIManager.instance.ClosePanel("Title Screen");
+        Game.instance.StartGame(numPlayers, null);
     }
 }

@@ -5,7 +5,7 @@ public class Player : Character
 {
     public static FInt PRADIUS = new FInt(100.0f);
     
-    private InputManager input;
+    private InputModule input;
     private FInt dmgLeftovers = FInt.Zero();
     private List<FVector> lastFacing;
     private FInt facing {
@@ -25,6 +25,7 @@ public class Player : Character
     }
 
     public Sword sword;
+    public string playerName;
 
     [SerializeField] private GameObject characterImg;
     [SerializeField] private GameObject characterMask;
@@ -43,12 +44,13 @@ public class Player : Character
         }
     }
 
-    public void Setup(InputManager input, FInt startx, FInt starty, int team)
+    public void Setup(InputModule input, FInt startx, FInt starty, int team, string name)
     {
         this.input = input;
         position.x = startx;
         position.y = starty;
         this.team = team;
+        playerName = name;
 
         transform.position = new Vector3(startx.ToFloat(), starty.ToFloat());
 

@@ -2,6 +2,13 @@
 using System;
 using System.Collections.Generic;
 
+public class OnlineGame
+{
+    public int seed;
+    public int myPlayerNum;
+    public List<string> playerNames;
+}
+
 public class Game : MonoBehaviour
 {
     public static FInt TIMESTEP = new FInt(0.01666f);
@@ -9,10 +16,11 @@ public class Game : MonoBehaviour
     public static Game instance = null;
     public static int numPlayers = 2;
     public static bool isPlaying = false;
+    public static bool isOnline = false;
 
     [SerializeField] private World world;
 
-    private List<InputManager> inputModules = new List<InputManager>();
+    private List<InputModule> inputModules = new List<InputModule>();
     private List<Enemy> enemies = new List<Enemy>();
     private List<Player> players = new List<Player>();
     private List<SwordPart> swordParts = new List<SwordPart>();
@@ -38,7 +46,7 @@ public class Game : MonoBehaviour
         {
             spawner.Advance();
         }
-        foreach (InputManager inputModule in inputModules)
+        foreach (InputModule inputModule in inputModules)
         {
             inputModule.Advance();
         }
@@ -57,11 +65,9 @@ public class Game : MonoBehaviour
         spawners.Add(spawner);
     }
 
-    public void StartGame(int numPlayers)
+    public void StartGame(int numPlayers, OnlineGame onlineGame)
     {
         Game.numPlayers = numPlayers;
-
-        NetworkingManager.seed = new System.Random();
 
         world.SetPlayersAndCameras();
 
@@ -69,13 +75,33 @@ public class Game : MonoBehaviour
         for (int pnum = 0; pnum < numPlayers; ++pnum)
         {
             Player p = playerObjects[pnum].GetComponent<Player>();
-            InputManager i = new InputManager(true, pnum + 1);
+            InputModule i;
+            if (onlineGame != null)
+            {
+                if (onlineGame.myPlayerNum == pnum + 1)
+                {
+                    // This forces the local player to accept input from p1 controls
+                    i = new InputModule(true, 1);
+                }
+                else
+                {
+                    i = new InputModule(false, 0);
+                }
+                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum + 1, onlineGame.playerNames[pnum]);
+                NetworkingManager.seed = new System.Random(onlineGame.seed);
+            }
+            else
+            {
+                i = new InputModule(true, pnum + 1);
+                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum + 1, string.Format("Player {0}", pnum + 1));
+                NetworkingManager.seed = new System.Random();
+            }
             players.Add(p);
             inputModules.Add(i);
-            p.Setup(i, FInt.Zero(), FInt.Zero(), pnum + 1);
         }
 
         isPlaying = true;
+        isOnline = onlineGame != null;
     }
 
     private void PickUpSwordParts()
@@ -186,5 +212,10 @@ public class Game : MonoBehaviour
             }
         }
         return pos;
+    }
+
+    public void GameMessage(int playerNum, string inputs)
+    {
+        inputModules[playerNum].Input(inputs);
     }
 }
