@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class OnlineGame
 {
-    public int seed;
     public int myPlayerNum;
     public List<string> playerNames;
 }
@@ -26,6 +25,10 @@ public class Game : MonoBehaviour
     private List<SwordPart> swordParts = new List<SwordPart>();
     private List<Spawner> spawners = new List<Spawner>();
 
+    private int frameNumber = 0;
+    private int bufferSent = 0;
+    private InputModule localPlayerInput = null;
+
     ~Game()
     {
         NetworkingManager.StopNetworking();
@@ -39,6 +42,22 @@ public class Game : MonoBehaviour
     void FixedUpdate()
     {
         if (!isPlaying) return;
+
+
+        if (isOnline)
+        {
+            // We need to send a bunch of buffered messages to reduce lag.
+            if (bufferSent < NetworkingManager.bufferSize)
+            {
+                localPlayerInput.Advance();
+                bufferSent += 1;
+            }
+            // If we're missing frames then skip the update!
+            if (NetworkingManager.GetMinimumFrame() <= frameNumber)
+            {
+                return;
+            }
+        }
 
         world.Advance();
         PickUpSwordParts();
@@ -58,6 +77,8 @@ public class Game : MonoBehaviour
         {
             enemy.Advance();
         }
+
+        frameNumber += 1;
     }
 
     public void AddSpawner(Spawner spawner)
@@ -67,6 +88,7 @@ public class Game : MonoBehaviour
 
     public void StartGame(int numPlayers, OnlineGame onlineGame)
     {
+        frameNumber = 0;
         Game.numPlayers = numPlayers;
 
         world.SetPlayersAndCameras();
@@ -82,13 +104,13 @@ public class Game : MonoBehaviour
                 {
                     // This forces the local player to accept input from p1 controls
                     i = new InputModule(true, 1);
+                    localPlayerInput = i;
                 }
                 else
                 {
                     i = new InputModule(false, 0);
                 }
                 p.Setup(i, FInt.Zero(), FInt.Zero(), pnum + 1, onlineGame.playerNames[pnum]);
-                NetworkingManager.seed = new System.Random(onlineGame.seed);
             }
             else
             {

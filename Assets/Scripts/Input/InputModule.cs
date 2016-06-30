@@ -45,8 +45,7 @@ public class InputModule
         bool b3 = _button3.Advance(string.Format("p{0}button3", localPlayerInput));
         bool b4 = _button4.Advance(string.Format("p{0}button4", localPlayerInput));
 
-        // TODO: Also test to make sure that the game is online
-        if (isLocalPlayer)
+        if (isLocalPlayer && Game.isOnline)
         {
             string output = string.Format("{0} {1} {2} {3} {4} {5}",
                 xAxis,

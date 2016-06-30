@@ -9,7 +9,6 @@ public class ButtonInput
     private int unchangedFrames = 0;
 
     private Queue<bool> buffer = new Queue<bool>();
-    public int bufferSize = 0;
 
     public bool justChanged
     {
@@ -37,7 +36,7 @@ public class ButtonInput
             buffer.Enqueue(newValue);
 
             // Keep filling the buffer!
-            if (buffer.Count <= bufferSize)
+            if (buffer.Count <= NetworkingManager.bufferSize)
             {
                 return newValue;
             }

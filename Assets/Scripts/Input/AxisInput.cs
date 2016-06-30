@@ -8,9 +8,7 @@ public class AxisInput
     private string axisName;
     private Stack<long> values = new Stack<long>();
 
-    // TODO: Append to the buffer from the NetworkingManager
     private Queue<long> buffer = new Queue<long>();
-    public int bufferSize = 0;
     
     public FInt value
     {
@@ -39,7 +37,7 @@ public class AxisInput
             buffer.Enqueue(newValue);
 
             // Keep filling the buffer!
-            if (buffer.Count <= bufferSize)
+            if (buffer.Count <= NetworkingManager.bufferSize)
             {
                 return newValue;
             }

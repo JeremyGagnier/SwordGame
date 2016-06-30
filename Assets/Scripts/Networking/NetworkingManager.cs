@@ -10,6 +10,7 @@ public class NetworkingManager
     private const int PORT = 5287;
 
     public static System.Random seed = null;
+    public static int bufferSize = 10;
 
     private static string username = "Guest";
     private static SocketHandler.Client clientSocket;
@@ -24,8 +25,8 @@ public class NetworkingManager
 
     public static bool StartNetworking()
     {
-        //clientSocket = new SocketHandler.Client(Dns.GetHostAddresses(DNS_NAME)[0], PORT);
-        
+        IPAddress ipAddress = Dns.GetHostAddresses(DNS_NAME)[0];
+        /*
         // This section finds the local IP address.
         // This is only used when the server is on the same computer.
         IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
@@ -38,6 +39,7 @@ public class NetworkingManager
                 break;
             }
         }
+        */
         clientSocket = new SocketHandler.Client(ipAddress, PORT);
         
         if (!clientSocket.isRunning)
@@ -87,6 +89,19 @@ public class NetworkingManager
         clientSocket.SendData("g " + inputs);
     }
 
+    public static int GetMinimumFrame()
+    {
+        int min = playerFrames[0];
+        for (int i = 1; i < playerFrames.Count; ++i)
+        {
+            if (playerFrames[i] < min)
+            {
+                min = playerFrames[i];
+            }
+        }
+        return min;
+    }
+
     private static void ProcessMessage(string message)
     {
         string[] args = message.Split(' ');
@@ -96,23 +111,27 @@ public class NetworkingManager
     private static void NewGame(string[] args)
     {
         OnlineGame gameInfo = new OnlineGame();
-        int numPlayers = Convert.ToInt32(args[1]);
-        gameInfo.myPlayerNum = Convert.ToInt32(args[2]);
+        seed = new System.Random(Convert.ToInt32(args[1]));
+        int numPlayers = Convert.ToInt32(args[2]);
+        gameInfo.myPlayerNum = Convert.ToInt32(args[3]);
         gameInfo.playerNames = new List<string>();
         for (int i = 0; i < numPlayers; ++i)
         {
-            gameInfo.playerNames.Add(args[i + 3]);
+            gameInfo.playerNames.Add(args[i + 4]);
+            playerFrames.Add(0);
         }
         Game.instance.StartGame(numPlayers, gameInfo);
     }
 
     private static void GetGameMessage(string[] args)
     {
+        int pnum = Convert.ToInt32(args[1]);
         string inputs = args[2];
         for (int i = 3; i < args.Length; ++i)
         {
             inputs += " " + args[i];
         }
-        Game.instance.GameMessage(Convert.ToInt32(args[1]), inputs);
+        playerFrames[pnum] += 1;
+        Game.instance.GameMessage(pnum, inputs);
     }
 }

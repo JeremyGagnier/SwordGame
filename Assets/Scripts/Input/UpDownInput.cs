@@ -3,7 +3,7 @@
 public class UpDownInput : AxisInput
 {
     public UpDownInput(bool isLocalPlayer, int playerNum) :
-        base(isLocalPlayer, playerNum, "x")
+        base(isLocalPlayer, playerNum, "y")
     {
     }
 }
