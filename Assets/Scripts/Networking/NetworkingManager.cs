@@ -22,6 +22,18 @@ public class NetworkingManager
     };
 
     private static List<int> playerFrames = new List<int>();
+    private static Queue<string> messageQueue = new Queue<string>();
+
+    public static void Advance()
+    {
+        while (messageQueue.Count > 0)
+        {
+            string message = messageQueue.Dequeue();
+            Debug.Log("Message: " + message);
+            string[] args = message.Split(' ');
+            routes[args[0]](args);
+        }
+    }
 
     public static bool StartNetworking()
     {
@@ -48,7 +60,7 @@ public class NetworkingManager
             clientSocket = null;
             return false;
         }
-        clientSocket.onReceiveData += ProcessMessage;
+        clientSocket.onReceiveData += (m) => messageQueue.Enqueue(m);
 
         return true;
     }
@@ -102,12 +114,6 @@ public class NetworkingManager
         return min;
     }
 
-    private static void ProcessMessage(string message)
-    {
-        string[] args = message.Split(' ');
-        routes[args[0]](args);
-    }
-
     private static void NewGame(string[] args)
     {
         OnlineGame gameInfo = new OnlineGame();
@@ -120,6 +126,9 @@ public class NetworkingManager
             gameInfo.playerNames.Add(args[i + 4]);
             playerFrames.Add(0);
         }
+
+        UIManager.instance.ClosePanel("Online Setup");
+        UIManager.instance.ClosePanel("Title Screen");
         Game.instance.StartGame(numPlayers, gameInfo);
     }
 

@@ -41,8 +41,9 @@ public class Game : MonoBehaviour
 
     void FixedUpdate()
     {
+        NetworkingManager.Advance();
+        
         if (!isPlaying) return;
-
 
         if (isOnline)
         {

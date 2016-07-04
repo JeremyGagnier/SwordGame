@@ -37,7 +37,7 @@ public class AxisInput
             buffer.Enqueue(newValue);
 
             // Keep filling the buffer!
-            if (buffer.Count <= NetworkingManager.bufferSize)
+            if (Game.isOnline && buffer.Count <= NetworkingManager.bufferSize)
             {
                 return newValue;
             }
