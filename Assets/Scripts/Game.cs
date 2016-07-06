@@ -28,6 +28,7 @@ public class Game : MonoBehaviour
     private int frameNumber = 0;
     private int bufferSent = 0;
     private InputModule localPlayerInput = null;
+    public int localPlayerNum = 0;
 
     ~Game()
     {
@@ -106,6 +107,7 @@ public class Game : MonoBehaviour
                     // This forces the local player to accept input from p1 controls
                     i = new InputModule(true, 1);
                     localPlayerInput = i;
+                    localPlayerNum = pnum + 1;
                 }
                 else
                 {
@@ -239,6 +241,7 @@ public class Game : MonoBehaviour
 
     public void GameMessage(int playerNum, string inputs)
     {
+        Debug.LogWarning(string.Format("Received message for player {0}. My player is {1}", playerNum, localPlayerNum));
         inputModules[playerNum - 1].Input(inputs);
     }
 }

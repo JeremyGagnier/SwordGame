@@ -98,6 +98,7 @@ public class NetworkingManager
 
     public static void SendGameMessage(string inputs)
     {
+        playerFrames[Game.instance.localPlayerNum - 1] += 1;
         clientSocket.SendData("g " + inputs);
     }
 
