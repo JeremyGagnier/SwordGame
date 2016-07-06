@@ -239,6 +239,6 @@ public class Game : MonoBehaviour
 
     public void GameMessage(int playerNum, string inputs)
     {
-        inputModules[playerNum].Input(inputs);
+        inputModules[playerNum - 1].Input(inputs);
     }
 }

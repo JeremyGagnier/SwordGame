@@ -140,7 +140,7 @@ public class NetworkingManager
         {
             inputs += " " + args[i];
         }
-        playerFrames[pnum] += 1;
+        playerFrames[pnum - 1] += 1;
         Game.instance.GameMessage(pnum, inputs);
     }
 }
