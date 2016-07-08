@@ -45,6 +45,7 @@ public class AxisInput
         else if (buffer.Count == 0)
         {
             Debug.LogError("Advance was called and there was no input!");
+            return newValue;
         }
 
         values.Push(buffer.Dequeue());

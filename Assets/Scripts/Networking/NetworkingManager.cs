@@ -12,7 +12,6 @@ public class NetworkingManager
     public static System.Random seed = null;
     public static int bufferSize = 10;
 
-    private static string username = "Guest";
     private static SocketHandler.Client clientSocket;
     private static Dictionary<string, Action<string[]>> routes =
         new Dictionary<string, Action<string[]>>()
@@ -29,7 +28,6 @@ public class NetworkingManager
         while (messageQueue.Count > 0)
         {
             string message = messageQueue.Dequeue();
-            Debug.Log("Message: " + message);
             string[] args = message.Split(' ');
             routes[args[0]](args);
         }
@@ -79,7 +77,6 @@ public class NetworkingManager
 
     public static void SetUsername(string name)
     {
-        username = name;
         if (clientSocket != null)
         {
             clientSocket.SendData("name " + name);
@@ -102,16 +99,23 @@ public class NetworkingManager
         clientSocket.SendData("g " + inputs);
     }
 
-    public static int GetMinimumFrame()
+    public static int GetMinimumFrame(int frameNumber)
     {
         int min = playerFrames[0];
+        string[] frameStrings = new string[playerFrames.Count];
         for (int i = 1; i < playerFrames.Count; ++i)
         {
             if (playerFrames[i] < min)
             {
                 min = playerFrames[i];
             }
+            frameStrings[i] = playerFrames[i].ToString();
         }
+        Debug.Log(string.Format(
+            "Current Frame: {0} | Min: {1} | All Frame Counts: {2}",
+            frameNumber.ToString(),
+            min.ToString(),
+            string.Join(", ", frameStrings)));
         return min;
     }
 

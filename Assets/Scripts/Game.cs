@@ -17,6 +17,8 @@ public class Game : MonoBehaviour
     public static bool isPlaying = false;
     public static bool isOnline = false;
 
+    public int localPlayerNum = 0;
+
     [SerializeField] private World world;
 
     private List<InputModule> inputModules = new List<InputModule>();
@@ -28,7 +30,6 @@ public class Game : MonoBehaviour
     private int frameNumber = 0;
     private int bufferSent = 0;
     private InputModule localPlayerInput = null;
-    public int localPlayerNum = 0;
 
     ~Game()
     {
@@ -55,7 +56,7 @@ public class Game : MonoBehaviour
                 bufferSent += 1;
             }
             // If we're missing frames then skip the update!
-            if (NetworkingManager.GetMinimumFrame() <= frameNumber)
+            if (NetworkingManager.GetMinimumFrame(frameNumber) <= frameNumber)
             {
                 return;
             }
@@ -241,7 +242,6 @@ public class Game : MonoBehaviour
 
     public void GameMessage(int playerNum, string inputs)
     {
-        Debug.LogWarning(string.Format("Received message for player {0}. My player is {1}", playerNum, localPlayerNum));
         inputModules[playerNum - 1].Input(inputs);
     }
 }
