@@ -8,19 +8,20 @@ public class NetworkingManager
 {
     private const string DNS_NAME = "progressiongames.servegame.org";
     private const int PORT = 5287;
+    private const int UDP_SEND_COUNT = 5;
 
     public static System.Random seed = null;
     public static int bufferSize = 10;
 
-    private static SocketHandler.Client clientSocket;
+    private static SocketHandler.UDPController udp = null;
+    private static SocketHandler.Client clientSocket = null;
     private static Dictionary<string, Action<string[]>> routes =
         new Dictionary<string, Action<string[]>>()
     {
-        { "ng", NewGame },
-        { "g", GetGameMessage },
+        { "ng", NewGame }
     };
 
-    private static List<int> playerFrames = new List<int>();
+    private static InputTracker inputTracker = null;
     private static Queue<string> messageQueue = new Queue<string>();
 
     public static void Advance()
@@ -60,11 +61,18 @@ public class NetworkingManager
         }
         clientSocket.onReceiveData += (m) => messageQueue.Enqueue(m);
 
+        udp = new SocketHandler.UDPController(clientSocket.socket);
+
         return true;
     }
 
     public static void StopNetworking()
     {
+        if (udp != null)
+        {
+            udp.Stop();
+            udp = null;
+        }
         if (clientSocket != null)
         {
             if (clientSocket.isRunning)
@@ -93,30 +101,14 @@ public class NetworkingManager
         clientSocket.SendData("queue " + string.Join(",", modeStrings));
     }
 
-    public static void SendGameMessage(string inputs)
+    public static void SendGameMessage(InputSegment segment)
     {
-        playerFrames[Game.instance.localPlayerNum - 1] += 1;
-        clientSocket.SendData("g " + inputs);
+        udp.SendData(inputTracker.SendInput(segment));
     }
 
-    public static int GetMinimumFrame(int frameNumber)
+    public static bool HasFrame(int frame)
     {
-        int min = playerFrames[0];
-        string[] frameStrings = new string[playerFrames.Count];
-        for (int i = 1; i < playerFrames.Count; ++i)
-        {
-            if (playerFrames[i] < min)
-            {
-                min = playerFrames[i];
-            }
-            frameStrings[i] = playerFrames[i].ToString();
-        }
-        Debug.Log(string.Format(
-            "Current Frame: {0} | Min: {1} | All Frame Counts: {2}",
-            frameNumber.ToString(),
-            min.ToString(),
-            string.Join(", ", frameStrings)));
-        return min;
+        return inputTracker.HasFrame(frame);
     }
 
     private static void NewGame(string[] args)
@@ -129,23 +121,14 @@ public class NetworkingManager
         for (int i = 0; i < numPlayers; ++i)
         {
             gameInfo.playerNames.Add(args[i + 4]);
-            playerFrames.Add(0);
         }
+
+        inputTracker = new InputTracker();
+        inputTracker.Setup(numPlayers, gameInfo.myPlayerNum);
+        udp.onReceiveData = inputTracker.AddInput;
 
         UIManager.instance.ClosePanel("Online Setup");
         UIManager.instance.ClosePanel("Title Screen");
         Game.instance.StartGame(numPlayers, gameInfo);
-    }
-
-    private static void GetGameMessage(string[] args)
-    {
-        int pnum = Convert.ToInt32(args[1]);
-        string inputs = args[2];
-        for (int i = 3; i < args.Length; ++i)
-        {
-            inputs += " " + args[i];
-        }
-        playerFrames[pnum - 1] += 1;
-        Game.instance.GameMessage(pnum, inputs);
     }
 }

@@ -47,26 +47,14 @@ public class InputModule
 
         if (isLocalPlayer && Game.isOnline)
         {
-            string output = string.Format("{0} {1} {2} {3} {4} {5}",
-                xAxis,
-                yAxis,
-                b1 ? "1" : "0",
-                b2 ? "1" : "0",
-                b3 ? "1" : "0",
-                b4 ? "1" : "0");
-
-            NetworkingManager.SendGameMessage(output);
+            InputSegment segment;
+            segment.xAxis = xAxis;
+            segment.yAxis = yAxis;
+            segment.button1 = b1;
+            segment.button2 = b2;
+            segment.button3 = b3;
+            segment.button4 = b4;
+            NetworkingManager.SendGameMessage(segment);
         }
-    }
-
-    public void Input(string inputs)
-    {
-        string[] data = inputs.Split(' ');
-        _xAxis.AddToBuffer(Convert.ToInt32(data[0]));
-        _yAxis.AddToBuffer(Convert.ToInt32(data[1]));
-        _button1.AddToBuffer(data[2] == "1");
-        _button2.AddToBuffer(data[3] == "1");
-        _button3.AddToBuffer(data[4] == "1");
-        _button4.AddToBuffer(data[5] == "1");
     }
 }

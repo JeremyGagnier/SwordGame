@@ -56,10 +56,7 @@ public class Game : MonoBehaviour
                 bufferSent += 1;
             }
             // If we're missing frames then skip the update!
-            if (NetworkingManager.GetMinimumFrame(frameNumber) <= frameNumber)
-            {
-                return;
-            }
+            if (!NetworkingManager.HasFrame(frameNumber)) return;
         }
 
         world.Advance();
@@ -238,10 +235,5 @@ public class Game : MonoBehaviour
             }
         }
         return pos;
-    }
-
-    public void GameMessage(int playerNum, string inputs)
-    {
-        inputModules[playerNum - 1].Input(inputs);
     }
 }
