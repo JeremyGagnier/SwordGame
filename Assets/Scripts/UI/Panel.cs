@@ -8,7 +8,7 @@ public class Panel : MonoBehaviour
     }
     public virtual void Close()
     {
-        Hide();
+        Destroy(this.gameObject);
     }
 
     public virtual void Show()

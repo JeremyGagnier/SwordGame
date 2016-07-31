@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class TitleScreen : Panel
 {
+    //TODO: Figure out how to get the network routed into this panel
     [SerializeField] private Button splitScreen;
     [SerializeField] private Button online;
     
@@ -14,15 +15,16 @@ public class TitleScreen : Panel
 
     private void SplitScreen()
     {
-        UIManager.instance.OpenPanel("Split Screen Setup");
+        UIManager.instance.OpenPanel(PanelType.SPLIT_SCREEN_SETUP);
     }
 
     private void Online()
     {
-        // TODO: Add online panel
+        /*
         if (NetworkingManager.StartNetworking())
         {
             UIManager.instance.OpenPanel("Online Setup");
         }
+         */
     }
 }
