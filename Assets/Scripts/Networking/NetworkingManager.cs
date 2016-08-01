@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
-public class NetworkingManager
+public class OnlineNetwork
 {
     private const string DNS_NAME = "progressiongames.servegame.org";
     private const int PORT = 5287;
@@ -13,18 +13,22 @@ public class NetworkingManager
     public static System.Random seed = null;
     public static int bufferSize = 10;
 
-    private static SocketHandler.UDPController udp = null;
-    private static SocketHandler.Client clientSocket = null;
-    private static Dictionary<string, Action<string[]>> routes =
-        new Dictionary<string, Action<string[]>>()
+    private SocketHandler.UDPController udp = null;
+    private SocketHandler.Client clientSocket = null;
+    private Dictionary<string, Action<string[]>> routes;
+
+    private InputTracker inputTracker = null;
+    private Queue<string> messageQueue = new Queue<string>();
+
+    public OnlineNetwork()
     {
-        { "ng", NewGame }
-    };
+        routes = new Dictionary<string, Action<string[]>>()
+        {
+            { "ng", NewGame }
+        };
+    }
 
-    private static InputTracker inputTracker = null;
-    private static Queue<string> messageQueue = new Queue<string>();
-
-    public static void Advance()
+    public void Advance()
     {
         while (messageQueue.Count > 0)
         {
@@ -34,10 +38,10 @@ public class NetworkingManager
         }
     }
 
-    public static bool StartNetworking()
+    public bool StartNetworking()
     {
-        IPAddress ipAddress = Dns.GetHostAddresses(DNS_NAME)[0];
-        /*
+        //IPAddress ipAddress = Dns.GetHostAddresses(DNS_NAME)[0];
+        
         // This section finds the local IP address.
         // This is only used when the server is on the same computer.
         IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
@@ -50,7 +54,7 @@ public class NetworkingManager
                 break;
             }
         }
-        */
+        
         clientSocket = new SocketHandler.Client(ipAddress, PORT);
         
         if (!clientSocket.isRunning)
@@ -66,7 +70,7 @@ public class NetworkingManager
         return true;
     }
 
-    public static void StopNetworking()
+    public void StopNetworking()
     {
         if (udp != null)
         {
@@ -83,7 +87,7 @@ public class NetworkingManager
         }
     }
 
-    public static void SetUsername(string name)
+    public void SetUsername(string name)
     {
         if (clientSocket != null)
         {
@@ -91,7 +95,7 @@ public class NetworkingManager
         }
     }
 
-    public static void StartSearching(List<int> gameModes)
+    public void StartSearching(List<int> gameModes)
     {
         string[] modeStrings = new string[gameModes.Count];
         for (int i = 0; i < gameModes.Count; ++i)
@@ -101,17 +105,22 @@ public class NetworkingManager
         clientSocket.SendData("queue " + string.Join(",", modeStrings));
     }
 
-    public static void SendGameMessage(InputSegment segment)
+    public void SendGameMessage(InputSegment segment)
     {
         udp.SendData(inputTracker.SendInput(segment));
     }
 
-    public static bool HasFrame(int frame)
+    public bool HasFrame(int frame)
     {
         return inputTracker.HasFrame(frame);
     }
 
-    private static void NewGame(string[] args)
+    public InputSegment GetInput(int pnum, int frame)
+    {
+        return inputTracker.GetInput(pnum, frame);
+    }
+
+    private void NewGame(string[] args)
     {
         OnlineGame gameInfo = new OnlineGame();
         seed = new System.Random(Convert.ToInt32(args[1]));
@@ -127,8 +136,8 @@ public class NetworkingManager
         inputTracker.Setup(numPlayers, gameInfo.myPlayerNum);
         udp.onReceiveData = inputTracker.AddInput;
 
-        UIManager.instance.ClosePanel("Online Setup");
-        UIManager.instance.ClosePanel("Title Screen");
+        UIManager.instance.ClosePanel(PanelType.ONLINE_SETUP);
+        UIManager.instance.ClosePanel(PanelType.TITLE_SCREEN);
         Game.instance.StartGame(numPlayers, gameInfo);
     }
 }

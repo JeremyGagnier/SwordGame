@@ -11,11 +11,9 @@ public class InputTracker {
     private List<List<InputSegment>> frames = new List<List<InputSegment>>();
     private List<Dictionary<int, InputSegment>> futureFrames = new List<Dictionary<int, InputSegment>>();
     private int playerNum;
-    private int numPlayers;
 
     public void Setup(int numPlayers, int playerNum)
     {
-        this.numPlayers = numPlayers;
         this.playerNum = playerNum;
 
         for (int i = 0; i < numPlayers; ++i)

@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class TitleScreen : Panel
 {
-    //TODO: Figure out how to get the network routed into this panel
     [SerializeField] private Button splitScreen;
     [SerializeField] private Button online;
     
@@ -20,11 +19,9 @@ public class TitleScreen : Panel
 
     private void Online()
     {
-        /*
-        if (NetworkingManager.StartNetworking())
+        if (Game.instance.GetNetwork().StartNetworking())
         {
-            UIManager.instance.OpenPanel("Online Setup");
+            UIManager.instance.OpenPanel(PanelType.ONLINE_SETUP);
         }
-         */
     }
 }
