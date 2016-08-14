@@ -50,7 +50,17 @@ public class Game : MonoBehaviour
         // If we're missing frames then skip the update!
         if (isOnline)
         {
-            if (!network.HasFrame(frameNumber)) return;
+            bool hasFrames = true;
+            for (int pnum = 0; pnum < numPlayers; ++pnum)
+            {
+                if (!network.HasFrame(pnum, frameNumber))
+                {
+                    // Ask politely using TCP
+                    network.AskForFrame(pnum, frameNumber);
+                    hasFrames = false;
+                }
+            }
+            if (!hasFrames) return;
         }
 
         world.Advance();
@@ -107,12 +117,12 @@ public class Game : MonoBehaviour
                 {
                     i = new InputModule(network, false, 0);
                 }
-                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum + 1, onlineGame.playerNames[pnum]);
+                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum, onlineGame.playerNames[pnum]);
             }
             else
             {
-                i = new InputModule(network, true, pnum + 1);
-                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum + 1, string.Format("Player {0}", pnum + 1));
+                i = new InputModule(network, true, pnum);
+                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum, string.Format("Player {0}", pnum));
                 OnlineNetwork.seed = new System.Random();
             }
             players.Add(p);

@@ -10,16 +10,13 @@ public struct InputSegment {
 public class InputTracker {
     private List<List<InputSegment>> frames = new List<List<InputSegment>>();
     private List<Dictionary<int, InputSegment>> futureFrames = new List<Dictionary<int, InputSegment>>();
-    private int playerNum;
 
-    public void Setup(int numPlayers, int playerNum)
+    public void Setup(int numPlayers)
     {
-        this.playerNum = playerNum;
-
         for (int i = 0; i < numPlayers; ++i)
         {
-            frames[i] = new List<InputSegment>();
-            futureFrames[i] = new Dictionary<int, InputSegment>();
+            frames.Add(new List<InputSegment>());
+            futureFrames.Add(new Dictionary<int, InputSegment>());
         }
     }
 
@@ -67,15 +64,33 @@ public class InputTracker {
         }
     }
 
-    public byte[] SendInput(InputSegment segment)
+    /// <summary>
+    /// This should only be used by the local player.
+    /// It assumes this input is for the latest frame.
+    /// </summary>
+    /// <param name="pnum">Player index</param>
+    /// <param name="segment">Input data</param>
+    /// <returns></returns>
+    public int SaveInput(int pnum, InputSegment segment)
     {
-        int frame = frames[playerNum].Count;
-        frames[playerNum].Add(segment);
+        int frame = frames[pnum].Count;
+        frames[pnum].Add(segment);
+        return frame;
+    }
+
+    public InputSegment GetInput(int pnum, int frame)
+    {
+        return frames[pnum][frame];
+    }
+
+    public byte[] GetData(int pnum, int frame)
+    {
+        InputSegment segment = frames[pnum][frame];
         byte[] message = new byte[20];
         message[0] = (byte)(frame / 65536);
         message[1] = (byte)(frame / 255);
         message[2] = (byte)frame;
-        message[3] = (byte)(playerNum +
+        message[3] = (byte)(pnum +
             (segment.button1 ? 1 : 0) * 4 +
             (segment.button2 ? 1 : 0) * 8 +
             (segment.button3 ? 1 : 0) * 16 +
@@ -100,17 +115,14 @@ public class InputTracker {
         return message;
     }
 
-    public bool HasFrame(int frame)
+    /// <summary>
+    /// Checks if this frame exists for one player
+    /// </summary>
+    /// <param name="pnum">Player index</param>
+    /// <param name="frame">Frame index</param>
+    /// <returns></returns>
+    public bool HasFrame(int pnum, int frame)
     {
-        foreach (List<InputSegment> playerFrames in frames)
-        {
-            if (playerFrames.Count <= frame) return false;
-        }
-        return true;
-    }
-
-    public InputSegment GetInput(int pnum, int frame)
-    {
-        return frames[pnum][frame];
+        return frames[pnum].Count > frame;
     }
 }

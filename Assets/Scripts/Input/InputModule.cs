@@ -53,10 +53,10 @@ public class InputModule
 
         long xAxis = _xAxis.Advance();
         long yAxis = _yAxis.Advance();
-        bool b1 = _button1.Advance(string.Format("p{0}button1", localPlayerInput));
-        bool b2 = _button2.Advance(string.Format("p{0}button2", localPlayerInput));
-        bool b3 = _button3.Advance(string.Format("p{0}button3", localPlayerInput));
-        bool b4 = _button4.Advance(string.Format("p{0}button4", localPlayerInput));
+        bool b1 = _button1.Advance(string.Format("p{0}button1", localPlayerInput + 1));
+        bool b2 = _button2.Advance(string.Format("p{0}button2", localPlayerInput + 1));
+        bool b3 = _button3.Advance(string.Format("p{0}button3", localPlayerInput + 1));
+        bool b4 = _button4.Advance(string.Format("p{0}button4", localPlayerInput + 1));
 
         if (Game.isOnline && isLocalPlayer)
         {

@@ -9,7 +9,8 @@ public class OnlineNetwork
     private const string DNS_NAME = "progressiongames.servegame.org";
     private const int PORT = 5287;
     private const int UDP_SEND_COUNT = 5;
-
+    private const float FRAME_ASK_DELAY = 1.0f;
+    
     public static System.Random seed = null;
     public static int bufferSize = 10;
 
@@ -19,12 +20,16 @@ public class OnlineNetwork
 
     private InputTracker inputTracker = null;
     private Queue<string> messageQueue = new Queue<string>();
+    private int localPlayerNum;
+
+    private float askTimer = 0.0f;
 
     public OnlineNetwork()
     {
         routes = new Dictionary<string, Action<string[]>>()
         {
-            { "ng", NewGame }
+            { "ng", NewGame },
+            { "f", SendFrame }
         };
     }
 
@@ -107,17 +112,31 @@ public class OnlineNetwork
 
     public void SendGameMessage(InputSegment segment)
     {
-        udp.SendData(inputTracker.SendInput(segment));
+        int frame = inputTracker.SaveInput(localPlayerNum, segment);
+        byte[] data = inputTracker.GetData(localPlayerNum, frame);
+        for (int i = 0; i < UDP_SEND_COUNT; ++i)
+        {
+            udp.SendData(data);
+        }
     }
 
-    public bool HasFrame(int frame)
+    public bool HasFrame(int pnum, int frame)
     {
-        return inputTracker.HasFrame(frame);
+        return inputTracker.HasFrame(pnum, frame);
     }
 
     public InputSegment GetInput(int pnum, int frame)
     {
         return inputTracker.GetInput(pnum, frame);
+    }
+
+    public void AskForFrame(int pnum, int frame)
+    {
+        if (Time.fixedTime >= askTimer + FRAME_ASK_DELAY)
+        {
+            clientSocket.SendData(string.Format("g {0} {1}", pnum, frame));
+            askTimer = Time.fixedTime;
+        }
     }
 
     private void NewGame(string[] args)
@@ -132,12 +151,31 @@ public class OnlineNetwork
             gameInfo.playerNames.Add(args[i + 4]);
         }
 
+        localPlayerNum = gameInfo.myPlayerNum;
+
         inputTracker = new InputTracker();
-        inputTracker.Setup(numPlayers, gameInfo.myPlayerNum);
+        inputTracker.Setup(numPlayers);
         udp.onReceiveData = inputTracker.AddInput;
 
         UIManager.instance.ClosePanel(PanelType.ONLINE_SETUP);
         UIManager.instance.ClosePanel(PanelType.TITLE_SCREEN);
         Game.instance.StartGame(numPlayers, gameInfo);
+    }
+
+    private void SendFrame(string[] args)
+    {
+        int frame = Convert.ToInt32(args[1]);
+        if (inputTracker.HasFrame(localPlayerNum, frame))
+        {
+            byte[] data = inputTracker.GetData(localPlayerNum, frame);
+            for (int i = 0; i < UDP_SEND_COUNT; ++i)
+            {
+                udp.SendData(data);
+            }
+        }
+        else
+        {
+            Debug.LogError("Asked to send frame but haven't computed it yet!");
+        }
     }
 }
