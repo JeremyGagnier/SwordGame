@@ -129,7 +129,7 @@ public class Sword : MonoBehaviour
         {
             return;
         }
-        FInt choose = FInt.RandomRange(NetworkingManager.seed, FInt.Zero(), w);
+        FInt choose = FInt.RandomRange(OnlineNetwork.seed, FInt.Zero(), w);
         // Second iteration finds the part at a random weight
         w = FInt.Zero();
         foreach (Node m in freeNodes)

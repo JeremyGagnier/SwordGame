@@ -21,6 +21,7 @@ public class Game : MonoBehaviour
 
     [SerializeField] private World world;
 
+    private OnlineNetwork network = new OnlineNetwork();
     private List<InputModule> inputModules = new List<InputModule>();
     private List<Enemy> enemies = new List<Enemy>();
     private List<Player> players = new List<Player>();
@@ -28,12 +29,11 @@ public class Game : MonoBehaviour
     private List<Spawner> spawners = new List<Spawner>();
 
     private int frameNumber = 0;
-    private int bufferSent = 0;
     private InputModule localPlayerInput = null;
-
-    ~Game()
+    
+    void OnApplicationQuit()
     {
-        NetworkingManager.StopNetworking();
+        network.StopNetworking();
     }
 
     void Awake()
@@ -43,23 +43,24 @@ public class Game : MonoBehaviour
 
     void FixedUpdate()
     {
-        NetworkingManager.Advance();
+        network.Advance();
         
         if (!isPlaying) return;
 
+        // If we're missing frames then skip the update!
         if (isOnline)
         {
-            // We need to send a bunch of buffered messages to reduce lag.
-            if (bufferSent < NetworkingManager.bufferSize)
+            bool hasFrames = true;
+            for (int pnum = 0; pnum < numPlayers; ++pnum)
             {
-                localPlayerInput.Advance();
-                bufferSent += 1;
+                if (!network.HasFrame(pnum, frameNumber))
+                {
+                    // Ask politely using TCP
+                    network.AskForFrame(pnum, frameNumber);
+                    hasFrames = false;
+                }
             }
-            // If we're missing frames then skip the update!
-            if (NetworkingManager.GetMinimumFrame(frameNumber) <= frameNumber)
-            {
-                return;
-            }
+            if (!hasFrames) return;
         }
 
         world.Advance();
@@ -70,7 +71,7 @@ public class Game : MonoBehaviour
         }
         foreach (InputModule inputModule in inputModules)
         {
-            inputModule.Advance();
+            inputModule.Advance(frameNumber);
         }
         foreach (Player player in players)
         {
@@ -91,6 +92,8 @@ public class Game : MonoBehaviour
 
     public void StartGame(int numPlayers, OnlineGame onlineGame)
     {
+        isOnline = onlineGame != null;
+
         frameNumber = 0;
         Game.numPlayers = numPlayers;
 
@@ -101,33 +104,47 @@ public class Game : MonoBehaviour
         {
             Player p = playerObjects[pnum].GetComponent<Player>();
             InputModule i;
-            if (onlineGame != null)
+            if (isOnline)
             {
-                if (onlineGame.myPlayerNum == pnum + 1)
+                if (onlineGame.myPlayerNum == pnum)
                 {
                     // This forces the local player to accept input from p1 controls
-                    i = new InputModule(true, 1);
+                    i = new InputModule(network, true, 1);
                     localPlayerInput = i;
-                    localPlayerNum = pnum + 1;
+                    localPlayerNum = pnum;
                 }
                 else
                 {
-                    i = new InputModule(false, 0);
+                    i = new InputModule(network, false, 0);
                 }
-                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum + 1, onlineGame.playerNames[pnum]);
+                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum, onlineGame.playerNames[pnum]);
             }
             else
             {
-                i = new InputModule(true, pnum + 1);
-                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum + 1, string.Format("Player {0}", pnum + 1));
-                NetworkingManager.seed = new System.Random();
+                i = new InputModule(network, true, pnum);
+                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum, string.Format("Player {0}", pnum));
+                OnlineNetwork.seed = new System.Random();
             }
             players.Add(p);
             inputModules.Add(i);
         }
 
         isPlaying = true;
-        isOnline = onlineGame != null;
+        if (isOnline)
+        {
+            for (int i = 0; i < OnlineNetwork.bufferSize; ++i)
+            {
+                localPlayerInput.Advance(0);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Only call this from panels
+    /// </summary>
+    public OnlineNetwork GetNetwork()
+    {
+        return network;
     }
 
     private void PickUpSwordParts()
@@ -238,10 +255,5 @@ public class Game : MonoBehaviour
             }
         }
         return pos;
-    }
-
-    public void GameMessage(int playerNum, string inputs)
-    {
-        inputModules[playerNum - 1].Input(inputs);
     }
 }

@@ -4,26 +4,36 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 
-public class NetworkingManager
+public class OnlineNetwork
 {
     private const string DNS_NAME = "progressiongames.servegame.org";
     private const int PORT = 5287;
-
+    private const int UDP_SEND_COUNT = 5;
+    private const float FRAME_ASK_DELAY = 1.0f;
+    
     public static System.Random seed = null;
     public static int bufferSize = 10;
 
-    private static SocketHandler.Client clientSocket;
-    private static Dictionary<string, Action<string[]>> routes =
-        new Dictionary<string, Action<string[]>>()
+    private SocketHandler.UDPController udp = null;
+    private SocketHandler.Client clientSocket = null;
+    private Dictionary<string, Action<string[]>> routes;
+
+    private InputTracker inputTracker = null;
+    private Queue<string> messageQueue = new Queue<string>();
+    private int localPlayerNum;
+
+    private float askTimer = 0.0f;
+
+    public OnlineNetwork()
     {
-        { "ng", NewGame },
-        { "g", GetGameMessage },
-    };
+        routes = new Dictionary<string, Action<string[]>>()
+        {
+            { "ng", NewGame },
+            { "f", SendFrame }
+        };
+    }
 
-    private static List<int> playerFrames = new List<int>();
-    private static Queue<string> messageQueue = new Queue<string>();
-
-    public static void Advance()
+    public void Advance()
     {
         while (messageQueue.Count > 0)
         {
@@ -33,10 +43,10 @@ public class NetworkingManager
         }
     }
 
-    public static bool StartNetworking()
+    public bool StartNetworking()
     {
-        IPAddress ipAddress = Dns.GetHostAddresses(DNS_NAME)[0];
-        /*
+        //IPAddress ipAddress = Dns.GetHostAddresses(DNS_NAME)[0];
+        
         // This section finds the local IP address.
         // This is only used when the server is on the same computer.
         IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
@@ -49,7 +59,7 @@ public class NetworkingManager
                 break;
             }
         }
-        */
+        
         clientSocket = new SocketHandler.Client(ipAddress, PORT);
         
         if (!clientSocket.isRunning)
@@ -60,11 +70,18 @@ public class NetworkingManager
         }
         clientSocket.onReceiveData += (m) => messageQueue.Enqueue(m);
 
+        udp = new SocketHandler.UDPController(clientSocket.socket);
+
         return true;
     }
 
-    public static void StopNetworking()
+    public void StopNetworking()
     {
+        if (udp != null)
+        {
+            udp.Stop();
+            udp = null;
+        }
         if (clientSocket != null)
         {
             if (clientSocket.isRunning)
@@ -75,7 +92,7 @@ public class NetworkingManager
         }
     }
 
-    public static void SetUsername(string name)
+    public void SetUsername(string name)
     {
         if (clientSocket != null)
         {
@@ -83,7 +100,7 @@ public class NetworkingManager
         }
     }
 
-    public static void StartSearching(List<int> gameModes)
+    public void StartSearching(List<int> gameModes)
     {
         string[] modeStrings = new string[gameModes.Count];
         for (int i = 0; i < gameModes.Count; ++i)
@@ -93,33 +110,36 @@ public class NetworkingManager
         clientSocket.SendData("queue " + string.Join(",", modeStrings));
     }
 
-    public static void SendGameMessage(string inputs)
+    public void SendGameMessage(InputSegment segment)
     {
-        playerFrames[Game.instance.localPlayerNum - 1] += 1;
-        clientSocket.SendData("g " + inputs);
-    }
-
-    public static int GetMinimumFrame(int frameNumber)
-    {
-        int min = playerFrames[0];
-        string[] frameStrings = new string[playerFrames.Count];
-        for (int i = 1; i < playerFrames.Count; ++i)
+        int frame = inputTracker.SaveInput(localPlayerNum, segment);
+        byte[] data = inputTracker.GetData(localPlayerNum, frame);
+        for (int i = 0; i < UDP_SEND_COUNT; ++i)
         {
-            if (playerFrames[i] < min)
-            {
-                min = playerFrames[i];
-            }
-            frameStrings[i] = playerFrames[i].ToString();
+            udp.SendData(data);
         }
-        Debug.Log(string.Format(
-            "Current Frame: {0} | Min: {1} | All Frame Counts: {2}",
-            frameNumber.ToString(),
-            min.ToString(),
-            string.Join(", ", frameStrings)));
-        return min;
     }
 
-    private static void NewGame(string[] args)
+    public bool HasFrame(int pnum, int frame)
+    {
+        return inputTracker.HasFrame(pnum, frame);
+    }
+
+    public InputSegment GetInput(int pnum, int frame)
+    {
+        return inputTracker.GetInput(pnum, frame);
+    }
+
+    public void AskForFrame(int pnum, int frame)
+    {
+        if (Time.fixedTime >= askTimer + FRAME_ASK_DELAY)
+        {
+            clientSocket.SendData(string.Format("g {0} {1}", pnum, frame));
+            askTimer = Time.fixedTime;
+        }
+    }
+
+    private void NewGame(string[] args)
     {
         OnlineGame gameInfo = new OnlineGame();
         seed = new System.Random(Convert.ToInt32(args[1]));
@@ -129,23 +149,33 @@ public class NetworkingManager
         for (int i = 0; i < numPlayers; ++i)
         {
             gameInfo.playerNames.Add(args[i + 4]);
-            playerFrames.Add(0);
         }
 
-        UIManager.instance.ClosePanel("Online Setup");
-        UIManager.instance.ClosePanel("Title Screen");
+        localPlayerNum = gameInfo.myPlayerNum;
+
+        inputTracker = new InputTracker();
+        inputTracker.Setup(numPlayers);
+        udp.onReceiveData = inputTracker.AddInput;
+
+        UIManager.instance.ClosePanel(PanelType.ONLINE_SETUP);
+        UIManager.instance.ClosePanel(PanelType.TITLE_SCREEN);
         Game.instance.StartGame(numPlayers, gameInfo);
     }
 
-    private static void GetGameMessage(string[] args)
+    private void SendFrame(string[] args)
     {
-        int pnum = Convert.ToInt32(args[1]);
-        string inputs = args[2];
-        for (int i = 3; i < args.Length; ++i)
+        int frame = Convert.ToInt32(args[1]);
+        if (inputTracker.HasFrame(localPlayerNum, frame))
         {
-            inputs += " " + args[i];
+            byte[] data = inputTracker.GetData(localPlayerNum, frame);
+            for (int i = 0; i < UDP_SEND_COUNT; ++i)
+            {
+                udp.SendData(data);
+            }
         }
-        playerFrames[pnum - 1] += 1;
-        Game.instance.GameMessage(pnum, inputs);
+        else
+        {
+            Debug.LogError("Asked to send frame but haven't computed it yet!");
+        }
     }
 }

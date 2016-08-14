@@ -5,10 +5,6 @@ public class World : MonoBehaviour
 {
     [SerializeField] private FInt width;
     [SerializeField] private FInt height;
-    [SerializeField] private GameObject p2Camera1;
-    [SerializeField] private GameObject p2Camera2;
-    [SerializeField] private GameObject p3Camera;
-    [SerializeField] private GameObject p4Camera;
 
     [SerializeField] private List<GameObject> enemyPrefabs;
     [SerializeField] private List<GameObject> swordPartPrefabs;
@@ -58,7 +54,7 @@ public class World : MonoBehaviour
                 {
                     if (x == 1 && y == 1) continue;
                     AttachCameraToPlayer(
-                        p + 1,
+                        p,
                         (Game.numPlayers == 2) ? 2 : 4,
                         new Vector3(
                             width.ToFloat() * (x - 1),
@@ -68,7 +64,7 @@ public class World : MonoBehaviour
             }
             // Add the main camera last so that unity renders it last.
             AttachCameraToPlayer(
-                p + 1,
+                p,
                 (Game.numPlayers == 2) ? 2 : 4,
                 new Vector3(0f, 118f, -10f));
         }
@@ -96,7 +92,7 @@ public class World : MonoBehaviour
     {
         GameObject cameraObj = new GameObject("Camera");
         Camera camera = cameraObj.AddComponent<Camera>();
-        cameraObj.transform.parent = players[player - 1].transform;
+        cameraObj.transform.parent = players[player].transform;
         cameraObj.transform.localPosition = position;
 
         camera.clearFlags = CameraClearFlags.Nothing;
@@ -108,10 +104,10 @@ public class World : MonoBehaviour
                 camera.orthographicSize = 800;
                 switch (player)
                 {
-                    case 1:
+                    case 0:
                         camera.rect = new Rect(0, 0, 0.5f, 1);
                         break;
-                    case 2:
+                    case 1:
                         camera.rect = new Rect(0.5f, 0, 0.5f, 1);
                         break;
                 }
@@ -120,16 +116,16 @@ public class World : MonoBehaviour
                 camera.orthographicSize = 500;
                 switch (player)
                 {
-                    case 1:
+                    case 0:
                         camera.rect = new Rect(0, 0.5f, 0.5f, 0.5f);
                         break;
-                    case 2:
+                    case 1:
                         camera.rect = new Rect(0.5f, 0.5f, 0.5f, 0.5f);
                         break;
-                    case 3:
+                    case 2:
                         camera.rect = new Rect(0, 0, 0.5f, 0.5f);
                         break;
-                    case 4:
+                    case 3:
                         camera.rect = new Rect(0.5f, 0, 0.5f, 0.5f);
                         break;
                 }

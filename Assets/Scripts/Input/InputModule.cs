@@ -2,6 +2,7 @@
 
 public class InputModule
 {
+    private OnlineNetwork network;
     private bool isLocalPlayer;
     private int localPlayerInput;
 
@@ -23,8 +24,9 @@ public class InputModule
     public bool button3Changed { get { return _button3.justChanged; } }
     public bool button4Changed { get { return _button4.justChanged; } }
 
-    public InputModule(bool isLocalPlayer, int localPlayerInput)
+    public InputModule(OnlineNetwork network, bool isLocalPlayer, int localPlayerInput)
     {
+        this.network = network;
         this.isLocalPlayer = isLocalPlayer;
         this.localPlayerInput = localPlayerInput;
 
@@ -36,37 +38,36 @@ public class InputModule
         _button4 = new ButtonInput(isLocalPlayer);
     }
 
-    public void Advance()
+    public void Advance(int frame)
     {
+        if (Game.isOnline && !isLocalPlayer)
+        {
+            InputSegment segment = network.GetInput(localPlayerInput, frame);
+            _xAxis.AddToBuffer(segment.xAxis);
+            _yAxis.AddToBuffer(segment.yAxis);
+            _button1.AddToBuffer(segment.button1);
+            _button2.AddToBuffer(segment.button2);
+            _button3.AddToBuffer(segment.button3);
+            _button4.AddToBuffer(segment.button4);
+        }
+
         long xAxis = _xAxis.Advance();
         long yAxis = _yAxis.Advance();
-        bool b1 = _button1.Advance(string.Format("p{0}button1", localPlayerInput));
-        bool b2 = _button2.Advance(string.Format("p{0}button2", localPlayerInput));
-        bool b3 = _button3.Advance(string.Format("p{0}button3", localPlayerInput));
-        bool b4 = _button4.Advance(string.Format("p{0}button4", localPlayerInput));
+        bool b1 = _button1.Advance(string.Format("p{0}button1", localPlayerInput + 1));
+        bool b2 = _button2.Advance(string.Format("p{0}button2", localPlayerInput + 1));
+        bool b3 = _button3.Advance(string.Format("p{0}button3", localPlayerInput + 1));
+        bool b4 = _button4.Advance(string.Format("p{0}button4", localPlayerInput + 1));
 
-        if (isLocalPlayer && Game.isOnline)
+        if (Game.isOnline && isLocalPlayer)
         {
-            string output = string.Format("{0} {1} {2} {3} {4} {5}",
-                xAxis,
-                yAxis,
-                b1 ? "1" : "0",
-                b2 ? "1" : "0",
-                b3 ? "1" : "0",
-                b4 ? "1" : "0");
-
-            NetworkingManager.SendGameMessage(output);
+            InputSegment segment;
+            segment.xAxis = xAxis;
+            segment.yAxis = yAxis;
+            segment.button1 = b1;
+            segment.button2 = b2;
+            segment.button3 = b3;
+            segment.button4 = b4;
+            network.SendGameMessage(segment);
         }
-    }
-
-    public void Input(string inputs)
-    {
-        string[] data = inputs.Split(' ');
-        _xAxis.AddToBuffer(Convert.ToInt32(data[0]));
-        _yAxis.AddToBuffer(Convert.ToInt32(data[1]));
-        _button1.AddToBuffer(data[2] == "1");
-        _button2.AddToBuffer(data[3] == "1");
-        _button3.AddToBuffer(data[4] == "1");
-        _button4.AddToBuffer(data[5] == "1");
     }
 }

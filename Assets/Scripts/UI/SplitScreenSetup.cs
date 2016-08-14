@@ -16,8 +16,8 @@ public class SplitScreenSetup : Panel
 
     private void StartGame(int numPlayers)
     {
-        UIManager.instance.ClosePanel("Split Screen Setup");
-        UIManager.instance.ClosePanel("Title Screen");
+        UIManager.instance.ClosePanel(PanelType.SPLIT_SCREEN_SETUP);
+        UIManager.instance.ClosePanel(PanelType.TITLE_SCREEN);
         Game.instance.StartGame(numPlayers, null);
     }
 }

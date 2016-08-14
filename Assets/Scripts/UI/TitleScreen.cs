@@ -14,15 +14,14 @@ public class TitleScreen : Panel
 
     private void SplitScreen()
     {
-        UIManager.instance.OpenPanel("Split Screen Setup");
+        UIManager.instance.OpenPanel(PanelType.SPLIT_SCREEN_SETUP);
     }
 
     private void Online()
     {
-        // TODO: Add online panel
-        if (NetworkingManager.StartNetworking())
+        if (Game.instance.GetNetwork().StartNetworking())
         {
-            UIManager.instance.OpenPanel("Online Setup");
+            UIManager.instance.OpenPanel(PanelType.ONLINE_SETUP);
         }
     }
 }

@@ -36,7 +36,7 @@ public class ButtonInput
             buffer.Enqueue(newValue);
 
             // Keep filling the buffer!
-            if (Game.isOnline && buffer.Count <= NetworkingManager.bufferSize)
+            if (Game.isOnline && buffer.Count <= OnlineNetwork.bufferSize)
             {
                 return newValue;
             }
