@@ -58,14 +58,8 @@ public class InputModule
         bool b3 = _swingRight.Advance();
         bool b4 = _dodge.Advance();
 
-        if (Game.isOnline && !isLocalPlayer)
-        {
-            UnityEngine.Debug.Log(playerNum.ToString() + " theirs: " + xAxis.ToString());
-        }
-
         if (Game.isOnline && isLocalPlayer)
         {
-            UnityEngine.Debug.Log(playerNum.ToString() + " mine: " + xAxis.ToString());
             InputSegment segment;
             segment.xAxis = xAxis;
             segment.yAxis = yAxis;
