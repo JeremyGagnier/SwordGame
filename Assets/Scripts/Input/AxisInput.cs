@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class AxisInput
 {
     private bool isLocalPlayer = false;
-    private int playerNum = 0;
+    private int playerNum;
     private string axisName;
     private Stack<long> values = new Stack<long>();
 
@@ -32,7 +32,15 @@ public class AxisInput
         {
             // It's fine if everyones processor does this differently because
             // this will be sent to other players.
-            float inputValue = Input.GetAxis(string.Format("p{0}axis{1}", playerNum + 1, axisName));
+            float inputValue;
+            if (Game.isOnline)
+            {
+                inputValue = Input.GetAxis(string.Format("p1axis{0}", axisName));
+            }
+            else
+            {
+                inputValue = Input.GetAxis(string.Format("p{0}axis{1}", playerNum + 1, axisName));
+            }
             newValue = (long)(inputValue * (1 << FInt.FLOATING_BITS));
             buffer.Enqueue(newValue);
 

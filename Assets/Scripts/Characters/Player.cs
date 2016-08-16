@@ -61,17 +61,17 @@ public class Player : Character
     {
         FVector dpos = new FVector(input.xAxis, -input.yAxis);
         dpos = dpos.Normalize();
-        if (input.button1 && input.button1Changed)
+        if (input.stab && input.stabChanged)
         {
             // Swing counter-clockwise
             sword.Swing(Sword.SwingState.CCWISE, facing);
         }
-        else if (input.button2 && input.button2Changed)
+        else if (input.swingLeft && input.swingLeftChanged)
         {
             // Stab
             sword.Swing(Sword.SwingState.STAB, facing);
         }
-        else if (input.button3 && input.button3Changed)
+        else if (input.swingRight && input.swingRightChanged)
         {
             // Swing clockwise
             sword.Swing(Sword.SwingState.CWISE, facing);
