@@ -12,7 +12,7 @@ public class OnlineNetwork
     private const float FRAME_ASK_DELAY = 1.0f;
     
     public static System.Random seed = null;
-    public static int bufferSize = 10;
+    public static int bufferSize = 6;
 
     private SocketHandler.UDPController udp = null;
     private SocketHandler.Client clientSocket = null;

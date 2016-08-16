@@ -109,13 +109,13 @@ public class Game : MonoBehaviour
                 if (onlineGame.myPlayerNum == pnum)
                 {
                     // This forces the local player to accept input from p1 controls
-                    i = new InputModule(network, true, 1);
+                    i = new InputModule(network, true, pnum);
                     localPlayerInput = i;
                     localPlayerNum = pnum;
                 }
                 else
                 {
-                    i = new InputModule(network, false, 0);
+                    i = new InputModule(network, false, pnum);
                 }
                 p.Setup(i, FInt.Zero(), FInt.Zero(), pnum, onlineGame.playerNames[pnum]);
             }
