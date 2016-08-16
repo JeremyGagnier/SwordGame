@@ -88,7 +88,7 @@ public class InputTracker {
         InputSegment segment = frames[pnum][frame];
         byte[] message = new byte[20];
         message[0] = (byte)(frame / 65536);
-        message[1] = (byte)(frame / 255);
+        message[1] = (byte)(frame / 256);
         message[2] = (byte)frame;
         message[3] = (byte)(pnum +
             (segment.button1 ? 1 : 0) * 4 +
@@ -100,7 +100,7 @@ public class InputTracker {
         message[6] = (byte)(segment.xAxis / 1099511627776);
         message[7] = (byte)(segment.xAxis / 4294967296);
         message[8] = (byte)(segment.xAxis / 16777216);
-        message[8] = (byte)(segment.xAxis / 65536);
+        message[9] = (byte)(segment.xAxis / 65536);
         message[10] = (byte)(segment.xAxis / 256);
         message[11] = (byte)segment.xAxis;
         message[12] = (byte)(segment.yAxis / 72057594037927936);
