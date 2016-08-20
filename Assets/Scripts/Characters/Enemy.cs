@@ -3,9 +3,9 @@ using UnityEngine.UI;
 
 public class Enemy : Character
 {
-    [SerializeField] private FInt health;
-    [SerializeField] private FInt damage;
-    [SerializeField] private FInt weight;
+    [SerializeField] private int health;
+    [SerializeField] private int damage;
+    [SerializeField] private int weight;
 
     [SerializeField] private Sprite normalTex;
     [SerializeField] private Sprite hitTex;
@@ -29,10 +29,10 @@ public class Enemy : Character
         base.Advance();
     }
 
-    public override void Damage(FInt damage)
+    public override void Damage(int damage)
     {
         health -= damage;
-        if (health.rawValue <= 0)
+        if (health <= 0)
         {
             Game.instance.KillEnemy(this);
             return;

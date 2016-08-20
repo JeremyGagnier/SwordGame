@@ -52,7 +52,10 @@ public class World : MonoBehaviour
             {
                 for (int y = 0; y < 3; ++y)
                 {
-                    if (x == 1 && y == 1) continue;
+                    if (x == 1 && y == 1)
+                    {
+                        continue;
+                    }
                     AttachCameraToPlayer(
                         p,
                         (Game.numPlayers == 2) ? 2 : 4,

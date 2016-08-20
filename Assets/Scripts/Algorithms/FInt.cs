@@ -23,6 +23,12 @@ public struct FVector
         FVector z = new FVector(x.x + y.x, x.y + y.y);
         return z;
     }
+    
+    public static FVector operator -(FVector x, FVector y)
+    {
+        FVector z = new FVector(x.x - y.x, x.y - y.y);
+        return z;
+    }
 
     public static FVector operator *(FVector x, FInt y)
     {

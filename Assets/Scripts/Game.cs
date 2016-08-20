@@ -44,8 +44,11 @@ public class Game : MonoBehaviour
     void FixedUpdate()
     {
         network.Advance();
-        
-        if (!isPlaying) return;
+
+        if (!isPlaying)
+        {
+            return;
+        }
 
         // If we're missing frames then skip the update!
         if (isOnline)
@@ -60,7 +63,10 @@ public class Game : MonoBehaviour
                     hasFrames = false;
                 }
             }
-            if (!hasFrames) return;
+            if (!hasFrames)
+            {
+                return;
+            }
         }
 
         world.Advance();
@@ -191,7 +197,7 @@ public class Game : MonoBehaviour
         int sourceTeam,
         FVector source,
         FInt radius,
-        FInt damage)
+        int damage)
     {
         // Generate a list of characters to do a generic hit test
         Character[] characters = new Character[players.Count + enemies.Count];

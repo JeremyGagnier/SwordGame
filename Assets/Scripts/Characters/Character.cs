@@ -23,7 +23,7 @@ public class Character : MonoBehaviour
         transform.position = new Vector3(position.x.ToFloat(), position.y.ToFloat());
     }
 
-    public virtual void Damage(FInt damage)
+    public virtual void Damage(int damage)
     {
 
     }

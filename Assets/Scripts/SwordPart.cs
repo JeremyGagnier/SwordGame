@@ -3,34 +3,23 @@
 public class SwordPart : MonoBehaviour
 {
     private SwordPart parent;
-    private FInt rotation;
     
     [HideInInspector] public FInt depthInSword = FInt.Zero();
     [HideInInspector] public Node consumedNode;
 
+    public FInt rotation;
     public Player player;
-    public FInt damage;
-    public FInt weight;
+    public int damage;
+    public int weight;
     public FInt radius;
     public Node[] nodePoints;
 
-    // TODO: Fix recursive sword part position calculations. They should be rotated by the swords rotation.
     private FVector _position;
     public FVector position
     {
         get
         {
-            // The sword part is the hilt (or on the ground) if there is no parent
-            if (parent == null)
-            {
-                // The sword part is on the ground if there is no player
-                if (player == null)
-                {
-                    return _position;
-                }
-                return _position + player.position;
-            }
-            return _position + parent.position;
+            return GetGlobalPosition(GetGlobalRotation());
         }
         set
         {
@@ -40,8 +29,28 @@ public class SwordPart : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        if (_position.x == null)
+        {
+            return;
+        }
         Gizmos.color = new Color(0f, 0f, 1f, 0.5f);
         Gizmos.DrawSphere(new Vector3(position.x.ToFloat(), position.y.ToFloat()), radius.ToFloat());
+
+        Gizmos.color = new Color(0f, 1f, 0f, 0.5f);
+        FInt myGlobalRotation = GetGlobalRotation();
+        foreach(Node node in nodePoints)
+        {
+            FVector nodePos = new FVector(node.pos).Rotate(myGlobalRotation);
+            nodePos += position;
+            Gizmos.DrawSphere(new Vector3(nodePos.x.ToFloat(), nodePos.y.ToFloat()), 20);
+        }
+        if (parent != null)
+        {
+            Gizmos.color = new Color(1f, 0f, 1f, 0.5f);
+            FVector consumedNodePos = new FVector(consumedNode.pos).Rotate(myGlobalRotation - rotation);
+            consumedNodePos += parent.position;
+            Gizmos.DrawSphere(new Vector3(consumedNodePos.x.ToFloat(), consumedNodePos.y.ToFloat()), 20);
+        }
     }
 
     void Awake()
@@ -55,6 +64,32 @@ public class SwordPart : MonoBehaviour
     public void Setup(FVector pos)
     {
         position = pos;
+    }
+
+    public FVector GetGlobalPosition(FInt globalRotation)
+    {
+        // The sword part is the hilt (or on the ground) if there is no parent
+        if (parent == null)
+        {
+            // The sword part is on the ground if there is no player
+            if (player == null)
+            {
+                return _position;
+            }
+            return _position + player.position;
+        }
+        globalRotation -= rotation;
+        FVector rotatedPosition = new FVector(_position).Rotate(globalRotation);
+        return rotatedPosition + parent.GetGlobalPosition(globalRotation);
+    }
+
+    public FInt GetGlobalRotation()
+    {
+        if (parent == null)
+        {
+            return rotation;
+        }
+        return rotation + parent.GetGlobalRotation();
     }
 
     public void Attach(Node attachPoint, int myPoint, GameObject sword, Player player)

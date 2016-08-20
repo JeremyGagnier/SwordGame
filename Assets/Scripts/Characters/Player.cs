@@ -6,7 +6,6 @@ public class Player : Character
     public static FInt PRADIUS = new FInt(100.0f);
     
     private InputModule input;
-    private FInt dmgLeftovers = FInt.Zero();
     private List<FVector> lastFacing;
     private FInt facing {
         get
@@ -49,7 +48,7 @@ public class Player : Character
         this.input = input;
         position.x = startx;
         position.y = starty;
-        this.team = team;
+        this.team = team + 1;
         playerName = name;
 
         transform.position = new Vector3(startx.ToFloat(), starty.ToFloat());
@@ -111,20 +110,13 @@ public class Player : Character
         base.Advance();
     }
 
-    public override void Damage(FInt damage)
+    public override void Damage(int damage)
     {
-        // Remove sword parts
-        dmgLeftovers += damage;
-        while (dmgLeftovers >= FInt.One())
-        {
-            dmgLeftovers -= FInt.One();
-            sword.RemovePart();
-        }
         invincibility += new FInt(0.4f);
     }
 
     public FInt CalculateSpeed()
     {
-        return 10 * FInt.Max(new FInt(100.0f) - sword.weight, new FInt(10.0f));
+        return 10 * FInt.Max(new FInt(100 - sword.weight), new FInt(10.0f));
     }
 }

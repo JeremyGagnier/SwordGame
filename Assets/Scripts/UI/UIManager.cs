@@ -55,7 +55,10 @@ public class UIManager : MonoBehaviour
     public void OpenPanel(PanelType p)
     {
         Panel panel = GetPanel(p);
-        if (panel == null) return;
+        if (panel == null)
+        {
+            return;
+        }
 
         if (panelStack.Count > 0) panelStack.Peek().Hide();
 

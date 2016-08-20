@@ -25,7 +25,19 @@ public class Sword : MonoBehaviour
     private List<SwordPart> parts = new List<SwordPart>();
 
     private FVector position;
-    private FInt rotation;
+    private FInt _rotation;
+    private FInt rotation
+    {
+        get
+        {
+            return _rotation;
+        }
+        set
+        {
+            hilt.rotation = value;
+            _rotation = value;
+        }
+    }
 
     private SwingState state = SwingState.NONE;
     private FInt swingDuration = FInt.Zero();
@@ -35,8 +47,8 @@ public class Sword : MonoBehaviour
 
     [SerializeField] private SwordPart hilt;
     
-    [HideInInspector] public FInt weight;
-    [HideInInspector] public FInt damage;
+    [HideInInspector] public int weight;
+    [HideInInspector] public int damage;
 
     public void Setup(Player owner)
     {
@@ -122,7 +134,10 @@ public class Sword : MonoBehaviour
         // First iteration counts the weight
         foreach (Node m in freeNodes)
         {
-            if (m.parent.depthInSword.rawValue < 0) continue;
+            if (m.parent.depthInSword.rawValue < 0)
+            {
+                continue;
+            }
             w += new FInt(1.0f) + m.parent.depthInSword * m.parent.depthInSword;
         }
         if (w.rawValue == 0)
@@ -134,7 +149,10 @@ public class Sword : MonoBehaviour
         w = FInt.Zero();
         foreach (Node m in freeNodes)
         {
-            if (m.parent.depthInSword.rawValue < 0) continue;
+            if (m.parent.depthInSword.rawValue < 0)
+            {
+                continue;
+            }
             w += new FInt(1.0f) + m.parent.depthInSword * m.parent.depthInSword;
             if (choose <= w)
             {
@@ -150,7 +168,10 @@ public class Sword : MonoBehaviour
         part.consumedNode = n;
         for (int i = 0; i < part.nodePoints.Length; ++i)
         {
-            if (i == attachPoint) continue;
+            if (i == attachPoint)
+            {
+                continue;
+            }
             freeNodes.Add(part.nodePoints[i]);
         }
 
