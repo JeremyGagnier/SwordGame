@@ -8,7 +8,9 @@ public class World : MonoBehaviour
 
     [SerializeField] private List<GameObject> enemyPrefabs;
     [SerializeField] private List<GameObject> swordPartPrefabs;
-    [SerializeField] private List<GameObject> players;
+    [SerializeField] private GameObject playerPrefab;
+
+    private List<GameObject> players = new List<GameObject>();
 
     void OnDrawGizmos()
     {
@@ -42,12 +44,19 @@ public class World : MonoBehaviour
         return players;
     }
 
+    private void CreatePlayer()
+    {
+        GameObject newPlayer = GameObject.Instantiate<GameObject>(playerPrefab);
+        newPlayer.name = "Player " + (players.Count + 1).ToString();
+        newPlayer.transform.parent = this.transform;
+        players.Add(newPlayer);
+    }
+
     public void SetPlayersAndCameras()
     {
-        players[0].SetActive(true);
-        players[1].SetActive(true);
-        for (int p = 0; p < 4; ++p)
+        for (int p = 0; p < Game.numPlayers; ++p)
         {
+            CreatePlayer();
             for (int x = 0; x < 3; ++x)
             {
                 for (int y = 0; y < 3; ++y)
@@ -70,24 +79,6 @@ public class World : MonoBehaviour
                 p,
                 (Game.numPlayers == 2) ? 2 : 4,
                 new Vector3(0f, 118f, -10f));
-        }
-
-        if (Game.numPlayers >= 3)
-        {
-            players[2].SetActive(true);
-        }
-        else
-        {
-            players[2].SetActive(false);
-        }
-
-        if (Game.numPlayers >= 4)
-        {
-            players[3].SetActive(true);
-        }
-        else
-        {
-            players[3].SetActive(false);
         }
     }
     

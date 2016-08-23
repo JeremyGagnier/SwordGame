@@ -6,7 +6,7 @@ public class Player : Character
     public static FInt PRADIUS = new FInt(100.0f);
     
     private InputModule input;
-    private List<FVector> lastFacing;
+    private List<FVector> lastFacing = new List<FVector>();
     private FInt facing {
         get
         {
@@ -36,7 +36,6 @@ public class Player : Character
 
     void Start()
     {
-        lastFacing = new List<FVector>();
         for (int i = 0; i < 3; ++i)
         {
             lastFacing.Add(new FVector(FInt.Zero(), FInt.Zero()));
