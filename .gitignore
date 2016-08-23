@@ -9,4 +9,5 @@ Obj/
 *.user
 *.userprefs
 *.DS_store
-*.suo
+
+SwordGame.v11.suo
