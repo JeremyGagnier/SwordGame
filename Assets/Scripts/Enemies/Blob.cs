@@ -14,8 +14,8 @@ public class Blob : Enemy
     }
     private State state;
     private FVector jumpDirection;
-    private FInt cooldown = FInt.Zero();
-    private FInt timeJumping = FInt.Zero();
+    private FInt cooldown = 0L;
+    private FInt timeJumping = 0L;
 
     void Start()
     {
@@ -29,12 +29,12 @@ public class Blob : Enemy
             cooldown += Game.TIMESTEP;
             if (cooldown >= jumpCooldown)
             {
-                cooldown = FInt.Zero();
+                cooldown = 0L;
                 jumpDirection = Game.instance.GetNearestPlayerPosition(position);
                 jumpDirection.x = (jumpDirection.x - position.x);
                 jumpDirection.y = (jumpDirection.y - position.y);
                 jumpDirection = jumpDirection.Normalize();
-                if (jumpDirection.x.rawValue < 0)
+                if (jumpDirection.x < 0L)
                 {
                     transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
                 }
@@ -50,7 +50,7 @@ public class Blob : Enemy
             timeJumping += Game.TIMESTEP;
             if (timeJumping >= jumpDuration)
             {
-                timeJumping = FInt.Zero();
+                timeJumping = 0L;
                 state = State.WAITING;
             }
             else

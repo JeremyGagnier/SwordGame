@@ -7,8 +7,8 @@ public class Spawner : MonoBehaviour
     public FInt cooldown;
     public FVector spawnPos;
 
-    private FInt waiting = FInt.Zero();
-    private FInt coolingDown = FInt.Zero();
+    private FInt waiting = 0L;
+    private FInt coolingDown = 0L;
 
     [SerializeField] private GameObject spawn;
 
@@ -23,14 +23,14 @@ public class Spawner : MonoBehaviour
         {
             coolingDown -= Game.TIMESTEP;
         }
-        else if (waiting.rawValue > 0)
+        else if (waiting > 0L)
         {
             waiting -= coolingDown;
-            coolingDown = FInt.Zero();
+            coolingDown = 0L;
         }
         else
         {
-            coolingDown = FInt.Zero();
+            coolingDown = 0L;
         }
 
         if (Game.instance.IsPlayerInRange(spawnPos, radius))
@@ -39,20 +39,20 @@ public class Spawner : MonoBehaviour
             if (waiting >= waitTime)
             {
                 waiting = waitTime;
-                if (coolingDown.rawValue <= 0)
+                if (coolingDown <= 0L)
                 {
                     Spawn();
                     coolingDown += cooldown;
                 }
             }
         }
-        else if (waiting.rawValue > 0)
+        else if (waiting > 0L)
         {
             waiting -= Game.TIMESTEP;
         }
         else
         {
-            waiting = FInt.Zero();
+            waiting = 0L;
         }
     }
 

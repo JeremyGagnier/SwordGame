@@ -123,12 +123,12 @@ public class Game : MonoBehaviour
                 {
                     i = new InputModule(network, false, pnum);
                 }
-                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum, onlineGame.playerNames[pnum]);
+                p.Setup(i, 0L, 0L, pnum, onlineGame.playerNames[pnum]);
             }
             else
             {
                 i = new InputModule(network, true, pnum);
-                p.Setup(i, FInt.Zero(), FInt.Zero(), pnum, string.Format("Player {0}", pnum));
+                p.Setup(i, 0L, 0L, pnum, string.Format("Player {0}", pnum));
                 OnlineNetwork.seed = new System.Random();
             }
             players.Add(p);
@@ -163,7 +163,7 @@ public class Game : MonoBehaviour
                 if (Collision.CircleToCircle(
                         part.position,
                         player.position,
-                        FInt.Zero(),
+                        0L,
                         player.radius))
                 {
                     player.sword.AddPart(part);
@@ -216,7 +216,7 @@ public class Game : MonoBehaviour
         {
             Character character = characters[i];
             if (character.team != sourceTeam &&
-                character.invincibility.rawValue <= 0 &&
+                character.invincibility <= 0L &&
                 Collision.CircleToCircle(
                     source,
                     character.position,

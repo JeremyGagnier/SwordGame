@@ -2,9 +2,9 @@
 
 public class Character : MonoBehaviour
 {
-    [HideInInspector] public FVector position = new FVector(FInt.Zero(), FInt.Zero());
+    [HideInInspector] public FVector position = new FVector(0L, 0L);
     [HideInInspector] public int team;
-    [HideInInspector] public FInt invincibility = FInt.Zero();
+    [HideInInspector] public FInt invincibility = 0L;
     public FInt radius;
 
     void OnDrawGizmos()
@@ -15,7 +15,7 @@ public class Character : MonoBehaviour
 
     public virtual void Advance()
     {
-        if (invincibility.rawValue > 0)
+        if (invincibility.Value() > 0)
         {
             invincibility -= Game.TIMESTEP;
         }

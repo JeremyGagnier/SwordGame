@@ -10,8 +10,8 @@ public class Player : Character
     private FInt facing {
         get
         {
-            FInt dx = FInt.Zero();
-            FInt dy = FInt.Zero();
+            FInt dx = 0L;
+            FInt dy = 0L;
             foreach (FVector vec in lastFacing)
             {
                 dx += vec.x;
@@ -38,7 +38,7 @@ public class Player : Character
     {
         for (int i = 0; i < 3; ++i)
         {
-            lastFacing.Add(new FVector(FInt.Zero(), FInt.Zero()));
+            lastFacing.Add(new FVector(0L, 0L));
         }
     }
 
@@ -75,7 +75,7 @@ public class Player : Character
             sword.Swing(Sword.SwingState.CWISE, facing);
         }
 
-        if (dpos.x.rawValue != 0 || dpos.y.rawValue != 0)
+        if (dpos.x != 0L || dpos.y != 0L)
         {
             position.x += dpos.x * CalculateSpeed() * Game.TIMESTEP;
             position.y += dpos.y * CalculateSpeed() * Game.TIMESTEP;
@@ -83,8 +83,8 @@ public class Player : Character
             lastFacing.Add(dpos);
         }
 
-        FInt fdx = FInt.Zero();
-        FInt fdy = FInt.Zero();
+        FInt fdx = 0L;
+        FInt fdy = 0L;
         foreach (FVector vec in lastFacing)
         {
             fdx += vec.x;
@@ -92,7 +92,7 @@ public class Player : Character
         }
 
         // TODO: Clean up this hack with animations
-        if (fdx.rawValue < 0)
+        if (fdx < 0L)
         {
             characterImg.transform.localPosition = new Vector3(30, 118, 0);
             characterImg.transform.localScale = new Vector3(1, 1, 1);

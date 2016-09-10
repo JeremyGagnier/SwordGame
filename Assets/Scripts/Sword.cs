@@ -40,15 +40,14 @@ public class Sword : MonoBehaviour
     }
 
     private SwingState state = SwingState.NONE;
-    private FInt swingDuration = FInt.Zero();
-    private FInt maxDuration = FInt.Zero();
-    private FInt swingCooldown = FInt.Zero();
-    private FInt angle = FInt.Zero();
+    private FInt swingDuration = 0L;
+    private FInt maxDuration = 0L;
+    private FInt swingCooldown = 0L;
+    private FInt angle = 0L;
 
     [SerializeField] private SwordPart hilt;
     
     [HideInInspector] public int weight;
-    [HideInInspector] public int damage;
 
     public void Setup(Player owner)
     {
@@ -56,7 +55,6 @@ public class Sword : MonoBehaviour
         hilt.player = owner;
         freeNodes.Add(hilt.nodePoints[0]);
         weight = hilt.weight;
-        damage = hilt.damage;
     }
     
     public void Advance()
@@ -69,19 +67,19 @@ public class Sword : MonoBehaviour
             switch (state)
             {
                 case SwingState.STAB:
-                    position.x = 150 * (FInt.One() - pct) * FInt.Cos(angle + FInt.PI() / 2);
-                    position.y = new FInt(61) + 150 * (FInt.One() - pct) * FInt.Sin(angle + FInt.PI() / 2);
+                    position.x = 150 * (new FInt(1L) - pct) * FInt.Cos(angle + FInt.PI / 2);
+                    position.y = new FInt(61) + 150 * (new FInt(1L) - pct) * FInt.Sin(angle + FInt.PI / 2);
                     rotation = angle;
                     break;
                 case SwingState.CWISE:
-                    position.x = 150 * FInt.Cos(angle + (new FInt(2) - pct) * FInt.PI() / 2);
-                    position.y = new FInt(61) + 150 * FInt.Sin(angle + (new FInt(2) - pct) * FInt.PI() / 2);
-                    rotation = angle + (-pct + 1) * FInt.PI() / 2;
+                    position.x = 150 * FInt.Cos(angle + (new FInt(2) - pct) * FInt.PI / 2);
+                    position.y = new FInt(61) + 150 * FInt.Sin(angle + (new FInt(2) - pct) * FInt.PI / 2);
+                    rotation = angle + (-pct + 1) * FInt.PI / 2;
                     break;
                 case SwingState.CCWISE:
-                    position.x = 150 * FInt.Cos(angle + pct * FInt.PI() / 2);
-                    position.y = new FInt(61) + 150 * FInt.Sin(angle + pct * FInt.PI() / 2);
-                    rotation = angle - (-pct + 1) * FInt.PI() / 2;
+                    position.x = 150 * FInt.Cos(angle + pct * FInt.PI / 2);
+                    position.y = new FInt(61) + 150 * FInt.Sin(angle + pct * FInt.PI / 2);
+                    rotation = angle - (-pct + 1) * FInt.PI / 2;
                     break;
             }
             transform.localPosition = new Vector3(position.x.ToFloat(), position.y.ToFloat());
@@ -92,7 +90,7 @@ public class Sword : MonoBehaviour
         else
         {
             hilt.gameObject.SetActive(false);
-            if (swingCooldown.rawValue > 0)
+            if (swingCooldown > 0L)
             {
                 swingCooldown -= Game.TIMESTEP;
             }
@@ -116,10 +114,10 @@ public class Sword : MonoBehaviour
         switch (state)
         {
             case SwingState.STAB:
-                angle = swingAngle - FInt.PI() / 2;
+                angle = swingAngle - FInt.PI / 2;
                 break;
             case SwingState.CWISE:
-                angle = swingAngle - FInt.PI();
+                angle = swingAngle - FInt.PI;
                 break;
             case SwingState.CCWISE:
                 angle = swingAngle;
@@ -130,26 +128,26 @@ public class Sword : MonoBehaviour
     public void AddPart(SwordPart part)
     {
         Node n = freeNodes[0];
-        FInt w = FInt.Zero();
+        FInt w = 0L;
         // First iteration counts the weight
         foreach (Node m in freeNodes)
         {
-            if (m.parent.depthInSword.rawValue < 0)
+            if (m.parent.depthInSword < 0L)
             {
                 continue;
             }
             w += new FInt(1.0f) + m.parent.depthInSword * m.parent.depthInSword;
         }
-        if (w.rawValue == 0)
+        if (w == 0L)
         {
             return;
         }
-        FInt choose = FInt.RandomRange(OnlineNetwork.seed, FInt.Zero(), w);
+        FInt choose = FInt.RandomRange(OnlineNetwork.seed, 0L, w);
         // Second iteration finds the part at a random weight
-        w = FInt.Zero();
+        w = 0L;
         foreach (Node m in freeNodes)
         {
-            if (m.parent.depthInSword.rawValue < 0)
+            if (m.parent.depthInSword < 0L)
             {
                 continue;
             }
@@ -177,7 +175,6 @@ public class Sword : MonoBehaviour
 
         parts.Add(part);
         weight += part.weight;
-        damage += part.damage;
     }
 
     public void RemovePart()
@@ -197,7 +194,6 @@ public class Sword : MonoBehaviour
         }
         freeNodes.Add(part.consumedNode);
         weight -= part.weight;
-        damage -= part.damage;
         parts.RemoveAt(parts.Count - 1);
     }
 

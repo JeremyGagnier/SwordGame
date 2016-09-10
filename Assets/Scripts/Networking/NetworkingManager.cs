@@ -45,8 +45,8 @@ public class OnlineNetwork
 
     public bool StartNetworking()
     {
-        //IPAddress ipAddress = Dns.GetHostAddresses(DNS_NAME)[0];
-        
+        IPAddress ipAddress = Dns.GetHostAddresses("192.168.2.16")[0];
+        /*
         // This section finds the local IP address.
         // This is only used when the server is on the same computer.
         IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
@@ -59,7 +59,7 @@ public class OnlineNetwork
                 break;
             }
         }
-        
+        */
         clientSocket = new SocketHandler.Client(ipAddress, PORT);
         
         if (!clientSocket.isRunning)

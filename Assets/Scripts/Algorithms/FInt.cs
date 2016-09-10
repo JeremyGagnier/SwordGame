@@ -46,7 +46,7 @@ public struct FVector
     public FVector Normalize()
     {
         FInt length = FInt.Sqrt(x * x + y * y);
-        if (length.rawValue == 0)
+        if (length.Value() == 0)
         {
             return this;
         }
@@ -72,133 +72,284 @@ public struct FVector
 }
 
 [System.Serializable]
-public class FInt : ISerializationCallbackReceiver
+public struct FInt : ISerializationCallbackReceiver
 {
     public const int FLOATING_BITS = 16;
+    private const long SHIFT = (long)(1 << FLOATING_BITS);
+    private const float FSHIFT = (float)(1 << FLOATING_BITS);
+    private const double DSHIFT = (double)(1 << FLOATING_BITS);
+    public static FInt PI = new FInt(3.14159);
 
-    [HideInInspector]
-    public long rawValue;
+    #region Critical Variables
+    private long value;
+    #endregion
 
+    #region Serialization
     [SerializeField]
     private float floatValue;
 
     public void OnBeforeSerialize()
     {
-        floatValue = ((float)rawValue) / (1 << FLOATING_BITS);
+        floatValue = ((float)value) / FSHIFT;
     }
 
     public void OnAfterDeserialize()
     {
-        rawValue = (long)(floatValue * (1 << FLOATING_BITS));
+        value = (long)(floatValue * FSHIFT);
+    }
+    #endregion
+
+    #region Constructors
+    public FInt(FInt x)
+    {
+        value = x.Value();
+        floatValue = (float)(value / FSHIFT);
     }
 
-    // I'm not sure if this is necessary to get the functionality I want.
-    // It didn't do anything initially.
-    /*
-    void OnGUI()
+    // This constructor is special because it assumes the long is raw
+    public FInt(long x)
     {
-        GUILayout.Label("Value: ");
-        floatValue = float.Parse(GUILayout.TextField(floatValue.ToString(), GUILayout.Width(200)));
-    }*/
-
-    public FInt()
-    {
+        value = x;
+        floatValue = (float)(value / FSHIFT);
     }
 
-    public FInt(FInt other)
+    public FInt(int x)
     {
-        rawValue = other.rawValue;
+        value = ((long)x) * SHIFT;
+        floatValue = (float)(value / FSHIFT);
     }
 
-    public FInt(int value)
+    public FInt(double x)
     {
-        rawValue = ((long)value) << FLOATING_BITS;
+        value = (long)(x * DSHIFT);
+        floatValue = (float)(value / FSHIFT);
     }
 
-    public FInt(long value)
+    public FInt(float x)
     {
-        rawValue = value << FLOATING_BITS;
+        value = (long)(x * FSHIFT);
+        floatValue = (float)(value / FSHIFT);
+    }
+    #endregion
+
+    #region Implicit Casts
+    public static implicit operator FInt(long x)
+    {
+        return new FInt(x);
+    }
+    #endregion
+
+    #region Getters
+    // This gives the raw value, all the others strip information
+    public long Value()
+    {
+        return value;
     }
 
-    public FInt(float value)
+    public long ToLong()
     {
-        rawValue = (long)(value * (1 << FLOATING_BITS));
+        return value / SHIFT;
     }
 
-    public FInt(double value)
+    public int ToInt()
     {
-        rawValue = (long)(value * (1 << FLOATING_BITS));
+        return (int)(value / SHIFT);
     }
 
-    public static FInt RawFInt(int raw)
+    public double ToDouble()
     {
-        FInt z = new FInt(0);
-        z.rawValue = (long)raw;
-        return z;
+        return ((double)value) / DSHIFT;
     }
 
-    public static FInt RawFInt(long raw)
+    public float ToFloat()
     {
-        FInt z = new FInt(0);
-        z.rawValue = raw;
-        return z;
+        return ((float)value) / FSHIFT;
     }
 
-    public static FInt Zero()
+    public override string ToString()
     {
-        return new FInt(0);
+        return (((double)value) / DSHIFT).ToString();
+    }
+    #endregion
+
+    #region Operator Overloads
+    #region + Overload
+    public static FInt operator +(FInt x, FInt y)
+    {
+        return new FInt(x.Value() + y.Value());
     }
 
-    public static FInt One()
+    public static FInt operator +(FInt x, long y)
     {
-        return new FInt(1);
+        return new FInt(x.Value() + y * SHIFT);
     }
 
-    public static FInt PI()
+    public static FInt operator +(long x, FInt y)
     {
-        return new FInt(3.14159);
+        return new FInt(y.Value() + x * SHIFT);
     }
 
-    // Largest signed long
-    public static FInt Max()
+    public static FInt operator +(FInt x, int y)
     {
-        FInt z = new FInt();
-        z.rawValue = long.MaxValue;
-        return z;
+        return new FInt(x.Value() + ((long)y) * SHIFT);
     }
 
-    // Return largest FInt
+    public static FInt operator +(int x, FInt y)
+    {
+        return new FInt(y.Value() + ((long)x) * SHIFT);
+    }
+    #endregion
+
+    #region - Overload
+    public static FInt operator -(FInt x, FInt y)
+    {
+        return new FInt(x.Value() - y.Value());
+    }
+
+    public static FInt operator -(FInt x, long y)
+    {
+        return new FInt(x.Value() - y * SHIFT);
+    }
+
+    public static FInt operator -(long x, FInt y)
+    {
+        return new FInt(x * SHIFT - y.Value());
+    }
+
+    public static FInt operator -(FInt x, int y)
+    {
+        return new FInt(x.Value() - ((long)y) * SHIFT);
+    }
+
+    public static FInt operator -(int x, FInt y)
+    {
+        return new FInt(((long)x) * SHIFT - y.Value());
+    }
+
+    public static FInt operator -(FInt x)
+    {
+        return new FInt(-x.Value());
+    }
+    #endregion
+
+    #region * Overload
+    public static FInt operator *(FInt x, FInt y)
+    {
+        return new FInt((x.Value() * y.Value()) / SHIFT);
+    }
+
+    public static FInt operator *(FInt x, long y)
+    {
+        return new FInt(x.Value() * y);
+    }
+
+    public static FInt operator *(long x, FInt y)
+    {
+        return new FInt(x * y.Value());
+    }
+
+    public static FInt operator *(FInt x, int y)
+    {
+        return new FInt(x.Value() * ((long)y));
+    }
+
+    public static FInt operator *(int x, FInt y)
+    {
+        return new FInt(((long)x) * y.Value());
+    }
+    #endregion
+
+    #region / Overload
+    public static FInt operator /(FInt x, FInt y)
+    {
+        return new FInt((x.Value() * SHIFT) / y.Value());
+    }
+
+    public static FInt operator /(FInt x, long y)
+    {
+        return new FInt(x.Value() / y);
+    }
+
+    public static FInt operator /(FInt x, int y)
+    {
+        return new FInt(x.Value() / ((long)y));
+    }
+    #endregion
+
+    public static FInt operator %(FInt x, FInt y)
+    {
+        return new FInt(x.Value() % y.Value());
+    }
+
+    #region Comparison Overloads
+    public static bool operator ==(FInt x, FInt y)
+    {
+        return x.Value() == y.Value();
+    }
+
+    public static bool operator !=(FInt x, FInt y)
+    {
+        return x.Value() != y.Value();
+    }
+
+    public static bool operator >(FInt x, FInt y)
+    {
+        return x.Value() > y.Value();
+    }
+
+    public static bool operator >=(FInt x, FInt y)
+    {
+        return x.Value() >= y.Value();
+    }
+
+    public static bool operator <(FInt x, FInt y)
+    {
+        return x.Value() < y.Value();
+    }
+
+    public static bool operator <=(FInt x, FInt y)
+    {
+        return x.Value() <= y.Value();
+    }
+    #endregion
+
+    public override int GetHashCode()
+    {
+        return value.GetHashCode();
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (!(obj is FInt))
+        {
+            return false;
+        }
+        return ((FInt)obj).Value() == value;
+    }
+    #endregion
+
+    #region Math
     public static FInt Max(FInt a, FInt b)
     {
-        FInt z = new FInt();
-        z.rawValue = (a.rawValue > b.rawValue) ? a.rawValue : b.rawValue;
-        return z;
+        long x = a.Value();
+        long y = b.Value();
+        return (x >= y) ? a : b;
     }
 
-    // Smallest signed long
-    public static FInt Min()
-    {
-        FInt z = new FInt();
-        z.rawValue = long.MinValue;
-        return z;
-    }
-
-    // Return smallest FInt
     public static FInt Min(FInt a, FInt b)
     {
-        FInt z = new FInt();
-        z.rawValue = (a.rawValue > b.rawValue) ? b.rawValue : a.rawValue;
-        return z;
+        long x = a.Value();
+        long y = b.Value();
+        return (x >= y) ? b : a;
     }
 
-    // Square root
     public static FInt Sqrt(FInt a)
     {
-        if (a.rawValue == 0)
+        if (a.Value() == 0L)
         {
-            return FInt.Zero();
+            return a;
         }
-        FInt x = FInt.One();
+        FInt x = 1L;
         for (int i = 0; i < 64; i++)
         {
             x = (x + a / x) / 2;
@@ -207,18 +358,17 @@ public class FInt : ISerializationCallbackReceiver
         return x;
     }
 
-    // Sin
     public static FInt Sin(FInt a)
     {
-        FInt x = a % (2 * PI());
-        bool overPi = x > PI();
+        FInt x = a % (2 * PI);
+        bool overPi = x > PI;
         if (overPi)
         {
-            x -= PI();
+            x -= PI;
         }
-        x = x 
-          - x * x * x / 6 
-          + x * x * x * x * x / 120 
+        x = x
+          - x * x * x / 6
+          + x * x * x * x * x / 120
           - x * x * x * x * x * x * x / 5040
           + x * x * x * x * x * x * x * x * x / 362880;
         if (overPi)
@@ -228,16 +378,15 @@ public class FInt : ISerializationCallbackReceiver
         return x;
     }
 
-    // Cosine
     public static FInt Cos(FInt a)
     {
-        FInt x = a % (2 * PI());
-        bool overPi = x > PI();
+        FInt x = a % (2 * PI);
+        bool overPi = x > PI;
         if (overPi)
         {
-            x -= PI();
+            x -= PI;
         }
-        x = FInt.One()
+        x = new FInt(1)
           - x * x / 2
           + x * x * x * x / 24
           - x * x * x * x * x * x / 720
@@ -250,10 +399,9 @@ public class FInt : ISerializationCallbackReceiver
         return x;
     }
 
-    // Tangent
     public static FInt Tan(FInt a)
     {
-        FInt x = a % (2 * PI());
+        FInt x = a % (2 * PI);
         x = x
           - x * x * x / 3
           + x * x * x * x * x * 2 / 15
@@ -267,45 +415,45 @@ public class FInt : ISerializationCallbackReceiver
     // Uses GBA implementation: http://www.coranac.com/documents/arctangent/
     public static FInt Atan(FInt dx, FInt dy)
     {
-        if (dx.rawValue == 0)
+        if (dx.Value() == 0)
         {
-            if (dy.rawValue >= 0)
+            if (dy.Value() >= 0)
             {
-                return new FInt(0.5) * PI();
+                return new FInt(0.5) * PI;
             }
             else
             {
-                return new FInt(1.5) * PI();
+                return new FInt(1.5) * PI;
             }
         }
-        if (dy.rawValue == 0)
+        if (dy.Value() == 0)
         {
-            if (dx.rawValue > 0)
+            if (dx.Value() > 0)
             {
-                return FInt.Zero();
+                return 0L;
             }
             else
             {
-                return PI();
+                return PI;
             }
         }
-        
-        if (dx.rawValue < 0)
+
+        if (dx.Value() < 0)
         {
-            if (dy.rawValue < 0)
+            if (dy.Value() < 0)
             {
-                return PI() + Atan(-dx, -dy);
+                return PI + Atan(-dx, -dy);
             }
             else
             {
-                return PI() - Atan(-dx, dy);
+                return PI - Atan(-dx, dy);
             }
         }
         else
         {
-            if (dy.rawValue < 0)
+            if (dy.Value() < 0)
             {
-                return 2 * PI() - Atan(dx, -dy);
+                return 2 * PI - Atan(dx, -dy);
             }
         }
 
@@ -318,7 +466,7 @@ public class FInt : ISerializationCallbackReceiver
             swapAxes = true;
         }
 
-        long t = (dy.rawValue << FLOATING_BITS) / dx.rawValue;
+        long t = (dy.Value() << FLOATING_BITS) / dx.Value();
         long t2 = -(t * t) >> FLOATING_BITS;
         long t4 = (t2 * t2) >> FLOATING_BITS;
         long t6 = (t4 * t2) >> FLOATING_BITS;
@@ -326,19 +474,19 @@ public class FInt : ISerializationCallbackReceiver
         long t10 = (t6 * t4) >> FLOATING_BITS;
         long t12 = (t6 * t6) >> FLOATING_BITS;
         long t14 = (t8 * t6) >> FLOATING_BITS;
-        FInt x = RawFInt(
-            ((65536 * t) >> FLOATING_BITS) +
-            ((((21845 * t) >> FLOATING_BITS) * t2) >> FLOATING_BITS) +
-            ((((13107 * t) >> FLOATING_BITS) * t4) >> FLOATING_BITS) +
-            ((((9102 * t) >> FLOATING_BITS) * t6) >> FLOATING_BITS) +
-            ((((6317 * t) >> FLOATING_BITS) * t8) >> FLOATING_BITS) +
-            ((((3664 * t) >> FLOATING_BITS) * t10) >> FLOATING_BITS) +
-            ((((1432 * t) >> FLOATING_BITS) * t12) >> FLOATING_BITS) +
-            ((((266 * t) >> FLOATING_BITS) * t14) >> FLOATING_BITS));
-        
+        FInt x = new FInt(
+            ((65536L * t) >> FLOATING_BITS) +
+            ((((21845L * t) >> FLOATING_BITS) * t2) >> FLOATING_BITS) +
+            ((((13107L * t) >> FLOATING_BITS) * t4) >> FLOATING_BITS) +
+            ((((9102L * t) >> FLOATING_BITS) * t6) >> FLOATING_BITS) +
+            ((((6317L * t) >> FLOATING_BITS) * t8) >> FLOATING_BITS) +
+            ((((3664L * t) >> FLOATING_BITS) * t10) >> FLOATING_BITS) +
+            ((((1432L * t) >> FLOATING_BITS) * t12) >> FLOATING_BITS) +
+            ((((266L * t) >> FLOATING_BITS) * t14) >> FLOATING_BITS));
+
         if (swapAxes)
         {
-            return PI() / 2 - x;
+            return PI / 2 - x;
         }
         return x;
     }
@@ -346,188 +494,14 @@ public class FInt : ISerializationCallbackReceiver
     // Return random FInt within a range. Includes both end points.
     public static FInt RandomRange(System.Random seed, FInt min, FInt max)
     {
-        if (min.rawValue > max.rawValue)
+        if (min > max)
         {
             Debug.LogError("Min must be less than max. Min: " + min.ToString() + ", Max: " + max.ToString());
-            return Zero();
+            return 0L;
         }
-        FInt r = RawFInt(seed.Next());
+        FInt r = new FInt((long)seed.Next());
         FInt diff = max - min;
-        return (r * diff) / RawFInt(2147483648) + min;
+        return (r * diff) / new FInt(2147483648L) + min;
     }
-
-    public int ToInt()
-    {
-        return (int)(rawValue >> FLOATING_BITS);
-    }
-
-    public int Round()
-    {
-        long flat = rawValue >> FLOATING_BITS;
-        long remainder = rawValue - (flat << FLOATING_BITS);
-        if (remainder > (long)(1 << (FLOATING_BITS - 1)))
-        {
-            return (int)flat + 1;
-        }
-        return (int)flat;
-    }
-
-    public float ToFloat()
-    {
-        return ((float)rawValue) / (1 << FLOATING_BITS);
-    }
-
-    public FInt Abs()
-    {
-        FInt z = new FInt();
-        z.rawValue = (rawValue < 0) ? -rawValue : rawValue;
-        return z;
-    }
-
-    public int FractionalBits()
-    {
-        long flat = rawValue >> FLOATING_BITS;
-        long remainder = rawValue - (flat << FLOATING_BITS);
-        return (int)remainder;
-    }
-
-    public static FInt operator +(FInt x, FInt y)
-    {
-        FInt z = new FInt(x);
-        z.rawValue += y.rawValue;
-        return z;
-    }
-
-    public static FInt operator +(FInt x, int y)
-    {
-        FInt z = new FInt(x);
-        z.rawValue += ((long)y) << FLOATING_BITS;
-        return z;
-    }
-
-    public static FInt operator -(FInt x, FInt y)
-    {
-        FInt z = new FInt(x);
-        z.rawValue -= y.rawValue;
-        return z;
-    }
-
-    public static FInt operator -(FInt x)
-    {
-        FInt z = new FInt(x);
-        z.rawValue = -z.rawValue;
-        return z;
-    }
-
-    public static FInt operator *(FInt x, FInt y)
-    {
-        FInt z = new FInt();
-        z.rawValue = (x.rawValue * y.rawValue) >> FLOATING_BITS;
-        return z;
-    }
-
-    public static FInt operator *(FInt x, int y)
-    {
-        FInt z = new FInt();
-        z.rawValue = x.rawValue * y;
-        return z;
-    }
-
-    public static FInt operator *(int y, FInt x)
-    {
-        FInt z = new FInt();
-        z.rawValue = x.rawValue * y;
-        return z;
-    }
-
-    public static FInt operator /(FInt x, FInt y)
-    {
-        FInt z = new FInt();
-        z.rawValue = (x.rawValue << FLOATING_BITS) / y.rawValue;
-        return z;
-    }
-
-    public static FInt operator /(FInt x, int y)
-    {
-        FInt z = new FInt();
-        z.rawValue = x.rawValue / y;
-        return z;
-    }
-
-    public static FInt operator %(FInt x, FInt y)
-    {
-        FInt z = new FInt();
-        z.rawValue = x.rawValue % y.rawValue;
-        return z;
-    }
-
-    public override int GetHashCode()
-    {
-        return rawValue.GetHashCode();
-    }
-
-    public override bool Equals(object obj)
-    {
-        if (obj == null)
-        {
-            return false;
-        }
-        FInt other = (FInt)obj;
-        if (other == null)
-        {
-            return false;
-        }
-        return rawValue == other.rawValue;
-    }
-
-    public static bool operator ==(FInt x, FInt y)
-    {
-        if (object.ReferenceEquals(null, x) && object.ReferenceEquals(null, y))
-        {
-            return true;
-        }
-        else if (object.ReferenceEquals(null, x) || object.ReferenceEquals(null, y))
-        {
-            return false;
-        }
-        return x.rawValue == y.rawValue;
-    }
-
-    public static bool operator !=(FInt x, FInt y)
-    {
-        if (object.ReferenceEquals(null, x) && object.ReferenceEquals(null, y))
-        {
-            return false;
-        }
-        else if (object.ReferenceEquals(null, x) || object.ReferenceEquals(null, y))
-        {
-            return true;
-        }
-        return x.rawValue != y.rawValue;
-    }
-
-    public static bool operator >(FInt x, FInt y)
-    {
-        return x.rawValue > y.rawValue;
-    }
-
-    public static bool operator >=(FInt x, FInt y)
-    {
-        return x.rawValue >= y.rawValue;
-    }
-
-    public static bool operator <(FInt x, FInt y)
-    {
-        return x.rawValue < y.rawValue;
-    }
-
-    public static bool operator <=(FInt x, FInt y)
-    {
-        return x.rawValue <= y.rawValue;
-    }
-
-    public override string ToString()
-    {
-        return (((float)rawValue) / (1 << FLOATING_BITS)).ToString();
-    }
+    #endregion
 }

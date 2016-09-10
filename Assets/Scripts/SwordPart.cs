@@ -4,7 +4,7 @@ public class SwordPart : MonoBehaviour
 {
     private SwordPart parent;
     
-    [HideInInspector] public FInt depthInSword = FInt.Zero();
+    [HideInInspector] public FInt depthInSword = 0L;
     [HideInInspector] public Node consumedNode;
 
     public FInt rotation;
@@ -29,10 +29,6 @@ public class SwordPart : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        if (_position.x == null)
-        {
-            return;
-        }
         Gizmos.color = new Color(0f, 0f, 1f, 0.5f);
         Gizmos.DrawSphere(new Vector3(position.x.ToFloat(), position.y.ToFloat()), radius.ToFloat());
 

@@ -28,25 +28,25 @@ public class Tests : EditorWindow
         numTests = 0;
         Test(
             () => { return FInt.Atan(new FInt(1), new FInt(0)); },
-            FInt.Zero(),
+            0L,
             "Test Atan for zero");
         Test(
             () => { return FInt.Atan(new FInt(-1), new FInt(0)); },
-            FInt.PI(),
+            FInt.PI,
             "Test Atan for pi");
         RangeTest(
             () => { return FInt.Atan(new FInt(-1), new FInt(1)); },
-            3 * FInt.PI() / 4,
+            3 * FInt.PI / 4,
             new FInt(0.01),
             "Test Atan for 3*pi/4");
         RangeTest(
             () => { return FInt.Atan(new FInt(1), new FInt(1)); },
-            FInt.PI() / 4,
+            FInt.PI / 4,
             new FInt(0.01),
             "Test Atan for pi/4");
         RangeTest(
             () => { return FInt.Atan(new FInt(1), new FInt(1000)); },
-            FInt.PI() / 2,
+            FInt.PI / 2,
             new FInt(0.01),
             "Test Atan for values close to pi/2");
         RangeTest(
@@ -61,51 +61,51 @@ public class Tests : EditorWindow
             "Test Atan for 1.10715");
 
         Test(
-            () => { return FInt.Sin(FInt.Zero()); },
-            FInt.Zero(),
+            () => { return FInt.Sin(0L); },
+            0L,
             "Test Sin for zero");
         RangeTest(
-            () => { return FInt.Sin(FInt.PI() / 2); },
-            FInt.One(),
+            () => { return FInt.Sin(FInt.PI / 2); },
+            new FInt(1),
             new FInt(0.01),
             "Test Sin for one");
         RangeTest(
-            () => { return FInt.Sin(FInt.PI() / 4); },
+            () => { return FInt.Sin(FInt.PI / 4); },
             FInt.Sqrt(new FInt(2)) / 2,
             new FInt(0.01),
             "Test Sin for sqrt(2) / 2");
         RangeTest(
-            () => { return FInt.Sin(-FInt.PI() / 4); },
+            () => { return FInt.Sin(-FInt.PI / 4); },
             -FInt.Sqrt(new FInt(2)) / 2,
             new FInt(0.01),
             "Test Sin for -sqrt(2) / 2. This one is through -pi / 4");
         RangeTest(
-            () => { return FInt.Sin(7 * FInt.PI() / 4); },
+            () => { return FInt.Sin(7 * FInt.PI / 4); },
             -FInt.Sqrt(new FInt(2)) / 2,
             new FInt(0.01),
             "Test Sin for -sqrt(2) / 2. This one is through 7 * pi / 4");
 
         Test(
-            () => { return FInt.Cos(FInt.Zero()); },
-            FInt.One(),
+            () => { return FInt.Cos(0L); },
+            new FInt(1),
             "Test Cos for one");
         RangeTest(
-            () => { return FInt.Cos(FInt.PI() / 2); },
-            FInt.Zero(),
+            () => { return FInt.Cos(FInt.PI / 2); },
+            0L,
             new FInt(0.01),
             "Test Cos for zero");
         RangeTest(
-            () => { return FInt.Cos(FInt.PI()); },
-            -FInt.One(),
+            () => { return FInt.Cos(FInt.PI); },
+            new FInt(-1),
             new FInt(0.01),
             "Test Cos for -1");
         RangeTest(
-            () => { return FInt.Cos(-FInt.PI() / 4); },
+            () => { return FInt.Cos(-FInt.PI / 4); },
             FInt.Sqrt(new FInt(2)) / 2,
             new FInt(0.01),
             "Test Cos for -sqrt(2) / 2. This one is through -pi / 4");
         RangeTest(
-            () => { return FInt.Cos(7 * FInt.PI() / 4); },
+            () => { return FInt.Cos(7 * FInt.PI / 4); },
             FInt.Sqrt(new FInt(2)) / 2,
             new FInt(0.01),
             "Test Cos for -sqrt(2) / 2. This one is through 7 * pi / 4");
@@ -124,7 +124,7 @@ public class Tests : EditorWindow
         System.Random r1 = new System.Random();
         //System.Random r2 = new System.Random(0);
         RangeTest(
-            () => { return FInt.RandomRange(r1, FInt.Zero(), FInt.One()); },
+            () => { return FInt.RandomRange(r1, 0L, new FInt(1)); },
             new FInt(0.5),
             new FInt(0.5),
             "Test Random Range to make sure the range is correct");

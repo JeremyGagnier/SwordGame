@@ -12,7 +12,7 @@ public class AxisInput
     
     public FInt value
     {
-        get { return FInt.RawFInt(values.Peek()); }
+        get { return new FInt(values.Peek()); }
     }
 
     public AxisInput(bool isLocalPlayer, int playerNum, string axisName)
