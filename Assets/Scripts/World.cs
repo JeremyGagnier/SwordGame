@@ -48,7 +48,7 @@ public class World : MonoBehaviour
     {
         GameObject newPlayer = GameObject.Instantiate<GameObject>(playerPrefab);
         newPlayer.name = "Player " + (players.Count + 1).ToString();
-        newPlayer.transform.parent = this.transform;
+        newPlayer.transform.SetParent(transform);
         players.Add(newPlayer);
     }
 
@@ -57,24 +57,6 @@ public class World : MonoBehaviour
         for (int p = 0; p < Game.numPlayers; ++p)
         {
             CreatePlayer();
-            for (int x = 0; x < 3; ++x)
-            {
-                for (int y = 0; y < 3; ++y)
-                {
-                    if (x == 1 && y == 1)
-                    {
-                        continue;
-                    }
-                    AttachCameraToPlayer(
-                        p,
-                        (Game.numPlayers == 2) ? 2 : 4,
-                        new Vector3(
-                            width.ToFloat() * (x - 1),
-                            height.ToFloat() * (y - 1) + 118f,
-                            -10f));
-                }
-            }
-            // Add the main camera last so that unity renders it last.
             AttachCameraToPlayer(
                 p,
                 (Game.numPlayers == 2) ? 2 : 4,
@@ -89,7 +71,7 @@ public class World : MonoBehaviour
         cameraObj.transform.parent = players[player].transform;
         cameraObj.transform.localPosition = position;
 
-        camera.clearFlags = CameraClearFlags.Nothing;
+        camera.clearFlags = CameraClearFlags.Color;
         camera.renderingPath = RenderingPath.Forward;
         camera.orthographic = true;
         switch (numScreens)
