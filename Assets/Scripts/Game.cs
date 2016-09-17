@@ -103,12 +103,11 @@ public class Game : MonoBehaviour
         frameNumber = 0;
         Game.numPlayers = numPlayers;
 
-        world.SetPlayersAndCameras();
+        world.Generate(numPlayers);
 
-        List<GameObject> playerObjects = world.GetPlayers();
+        List<Player> playerObjects = world.GetPlayers();
         for (int pnum = 0; pnum < numPlayers; ++pnum)
         {
-            Player p = playerObjects[pnum].GetComponent<Player>();
             InputModule i;
             if (isOnline)
             {
@@ -123,15 +122,15 @@ public class Game : MonoBehaviour
                 {
                     i = new InputModule(network, false, pnum);
                 }
-                p.Setup(i, 0L, 0L, pnum, onlineGame.playerNames[pnum]);
+                playerObjects[pnum].Setup(i, 0L, 0L, pnum, onlineGame.playerNames[pnum]);
             }
             else
             {
                 i = new InputModule(network, true, pnum);
-                p.Setup(i, 0L, 0L, pnum, string.Format("Player {0}", pnum));
+                playerObjects[pnum].Setup(i, 0L, 0L, pnum, string.Format("Player {0}", pnum));
                 OnlineNetwork.seed = new System.Random();
             }
-            players.Add(p);
+            players.Add(playerObjects[pnum]);
             inputModules.Add(i);
         }
 

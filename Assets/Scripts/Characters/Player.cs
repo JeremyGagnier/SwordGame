@@ -95,14 +95,14 @@ public class Player : Character
         if (fdx < 0L)
         {
             characterImg.transform.localPosition = new Vector3(30, 118, 0);
-            characterImg.transform.localScale = new Vector3(1, 1, 1);
-            characterMask.transform.localScale = new Vector3(1, 1, 1);
+            characterImg.transform.localScale = new Vector3(184, 253, 1);
+            characterMask.transform.localScale = new Vector3(137, 148, 1);
         }
         else
         {
             characterImg.transform.localPosition = new Vector3(-30, 118, 0);
-            characterImg.transform.localScale = new Vector3(-1, 1, 1);
-            characterMask.transform.localScale = new Vector3(-1, 1, 1);
+            characterImg.transform.localScale = new Vector3(-184, 253, 1);
+            characterMask.transform.localScale = new Vector3(-137, 148, 1);
         }
 
         sword.Advance();

@@ -113,13 +113,6 @@ public class SwordPart : MonoBehaviour
 
         // TODO: Find depthInSword via recursive transformations
         // BREAKS: Proper sword construction
-        /*
-        Vector3 localrot = sword.transform.localEulerAngles;
-        sword.transform.localEulerAngles = new Vector3(0, 0, 0);
-        Vector3 diff = transform.position - sword.transform.position;
-        truey = diff.y;
-        sword.transform.localEulerAngles = localrot;
-         */
     }
 
     public void Attack()
